@@ -1,0 +1,161 @@
+QMainWindow {
+    background-color: #2b2b2b;
+    font-size: 12px;
+}
+
+QLabel {
+    color: #ffffff;
+    font-size: 12px;
+}
+
+QPushButton {
+    background-color: #4a4a4a;
+    color: #ffffff;
+    border: 1px solid #555555;
+    padding: 5px;
+    border-radius: 0;
+    font-size: 12px;
+}
+
+QLineEdit {
+    background-color: #3c3c3c;
+    color: #ffffff;
+    border: 1px solid #555555;
+    padding: 5px;
+    border-radius: 0;
+    font-size: 12px;
+}
+
+QPushButton:hover {
+    background-color: #5a5a5a;
+}
+
+QPushButton:pressed {
+    background-color: #3a3a3a;
+}
+
+QGroupBox {
+    background-color: #333333;
+    color: #ffffff;
+    border: 1px solid #555555;
+    margin-top: 1em;
+    border-radius: 0;
+    font-size: 12px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 3px;
+}
+
+QSpinBox {
+    background-color: #3c3c3c;
+    color: #ffffff;
+    border: 1px solid #555555;
+    padding: 5px;
+    border-radius: 0;
+    font-size: 12px;
+}
+
+QTabWidget::pane {
+    border: 1px solid #555555;
+    background: #2b2b2b;
+}
+
+QTabBar::tab {
+    background: #3c3c3c;
+    color: #ffffff;
+    padding: 5px;
+    border-radius: 0;
+    font-size: 12px;
+}
+
+QTabBar::tab:selected {
+    background: #4a4a4a;
+}
+
+#tabSettings QLabel {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+#tabSettings QLineEdit, #tabSettings QSpinBox {
+    margin-bottom: 10px;
+    min-width: 200px;
+    font-size: 12px;
+}
+
+#tabSettings QGroupBox {
+    padding: 10px;
+}
+
+QRadioButton {
+    color: #ffffff;
+    font-size: 12px;
+}
+
+QRadioButton::indicator {
+    border: 1px solid #555555;
+    background-color: #3c3c3c;
+    width: 16px;
+    height: 16px;
+    border-radius: 8px;
+}
+
+QRadioButton::indicator:checked {
+    background-color: #5a5a5a;
+}
+
+QSpinBox::up-button, QSpinBox::down-button {
+    background-color: #4a4a4a;
+    border: 1px solid #555555;
+    width: 16px;
+}
+
+QSpinBox::up-button:hover, QSpinBox::down-button:hover {
+    background-color: #5a5a5a;
+}
+
+QSpinBox::up-button:pressed, QSpinBox::down-button:pressed {
+    background-color: #3a3a3a;
+}
+
+QProgressDialog {
+    background-color: #2b2b2b;
+    color: #ffffff;
+}
+
+QProgressDialog QProgressBar {
+    background-color: #3c3c3c;
+    border: 1px solid #555555;
+}
+
+QMessageBox {
+    background-color: #2b2b2b;
+    color: #ffffff;
+}
+
+QMessageBox QPushButton {
+    background-color: #4a4a4a;
+    color: #ffffff;
+    border: 1px solid #555555;
+    padding: 5px;
+}
+
+/* Styles pour QCheckBox dans le thème sombre */
+QCheckBox {
+    color: #ffffff;  /* Texte blanc */
+    font-size: 12px;  /* Taille cohérente */
+}
+
+QCheckBox::indicator {
+    border: 1px solid #555555;  /* Bordure grise */
+    background-color: #3c3c3c;  /* Fond gris foncé */
+    width: 16px;
+    height: 16px;
+}
+
+QCheckBox::indicator:checked {
+    background-color: #5a5a5a;  /* Fond plus clair quand coché */
+}

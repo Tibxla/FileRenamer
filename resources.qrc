@@ -1,0 +1,9 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource>
+        <file>icon.png</file>
+        <file>style.qss</file>
+        <file>light.qss</file>
+        <file>animation.gif</file>
+    </qresource>
+</RCC>
