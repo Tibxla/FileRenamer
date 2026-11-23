@@ -1,12 +1,14 @@
-#include "folderdroplineedit.h"
+#include "folderdropzone.h"
 #include "nomenclaturestore.h"
 #include "renamecore.h"
 
 #include <QDir>
 #include <QDragEnterEvent>
 #include <QFile>
+#include <QLabel>
 #include <QMimeData>
 #include <QSettings>
+#include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QTest>
 #include <QUrl>
@@ -32,6 +34,7 @@ private slots:
     void nomenclatureStore();
     void folderAndFileDrops();
     void rejectsNonLocalDrop();
+    void zoneRequestsBrowsing();
 };
 
 void FileRenamerTests::extractNumber_data()
@@ -229,8 +232,9 @@ void FileRenamerTests::folderAndFileDrops()
     QVERIFY(file.open(QIODevice::WriteOnly));
     file.close();
 
-    FolderDropLineEdit field;
+    FolderDropZone field;
     QVERIFY(field.acceptDrops());
+    QSignalSpy changes(&field, &FolderDropZone::pathChanged);
     const QPoint position(5, 5);
     const auto sendDrop = [&](const QString &path) {
         QMimeData mime;
@@ -251,15 +255,17 @@ void FileRenamerTests::folderAndFileDrops()
     };
 
     sendDrop(temp.path());
-    QCOMPARE(field.text(), temp.path());
+    QCOMPARE(field.path(), temp.path());
     sendDrop(file.fileName());
-    QCOMPARE(field.text(), temp.filePath("folder"));
+    QCOMPARE(field.path(), temp.filePath("folder"));
+    QCOMPARE(changes.count(), 2);
+    QCOMPARE(changes.last().constFirst().toString(), temp.filePath("folder"));
 }
 
 void FileRenamerTests::rejectsNonLocalDrop()
 {
-    FolderDropLineEdit field;
-    field.setText("dossier");
+    FolderDropZone field;
+    field.setPath("dossier");
     QMimeData mime;
     mime.setUrls({QUrl("https://example.test/report.txt")});
     QDragEnterEvent enter(QPoint(5, 5), Qt::CopyAction, &mime, Qt::LeftButton, Qt::NoModifier);
@@ -269,7 +275,30 @@ void FileRenamerTests::rejectsNonLocalDrop()
     QDropEvent drop(QPointF(5, 5), Qt::CopyAction, &mime, Qt::LeftButton, Qt::NoModifier);
     QCoreApplication::sendEvent(&field, &drop);
     QVERIFY(!drop.isAccepted());
-    QCOMPARE(field.text(), QString("dossier"));
+    QCOMPARE(field.path(), QString("dossier"));
+}
+
+void FileRenamerTests::zoneRequestsBrowsing()
+{
+    FolderDropZone zone;
+    zone.resize(300, 90);
+    QSignalSpy requests(&zone, &FolderDropZone::browseRequested);
+    QTest::mouseClick(&zone, Qt::LeftButton, Qt::NoModifier, QPoint(150, 45));
+    QCOMPARE(requests.count(), 1);
+    QTest::mouseClick(&zone, Qt::RightButton, Qt::NoModifier, QPoint(150, 45));
+    QCOMPARE(requests.count(), 1);
+    QTest::keyClick(&zone, Qt::Key_Space);
+    QCOMPARE(requests.count(), 2);
+
+    // Un clic sur un libellé de la zone compte comme un clic sur la zone.
+    zone.setTitle("Dossier source");
+    zone.show();
+    QVERIFY(QTest::qWaitForWindowExposed(&zone));
+    auto *title = zone.findChild<QLabel *>("zoneTitle");
+    QVERIFY(title);
+    QTest::mouseClick(title, Qt::LeftButton);
+    QCOMPARE(requests.count(), 3);
+    QVERIFY(zone.path().isEmpty());
 }
 
 QTEST_MAIN(FileRenamerTests)

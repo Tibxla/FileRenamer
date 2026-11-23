@@ -8,18 +8,18 @@ Download `FileRenamer-windows.zip` from [GitHub Releases](https://github.com/Tib
 
 ## Rename files
 
-1. Choose the source and destination folders with **Parcourir**, or drag a folder onto either field. Dropping a file fills the field with its parent folder. You can also type the paths. FileRenamer creates the destination folder if needed.
+1. Choose the source and destination folders. Drag a folder onto the **Dossier source** or **Dossier d'arrivée** drop zone, or click anywhere on a zone to pick a folder in the standard Windows dialog. Dropping a file uses its parent folder. Each zone then shows the folder name and its full path. FileRenamer creates the destination folder if needed.
 2. Enter a naming template in **Nomenclature**. Use `{n}` wherever the number should appear. For example, `PARIS_P{n}` turns `paris_004.pdf` into `PARIS_P004.pdf`. A template without `{n}`, such as `paris`, is treated as `paris_{n}`.
-3. Check the live preview below **Nomenclature**. It shows the first planned copy and counts the files to copy and skip, including conflicts with files already in the destination folder.
-4. Click **Renommer**. The progress dialog lets you cancel between copies. The result dialog lists the reason for each skipped file. If at least one copy was created, click **Ouvrir le dossier d'arrivée** to open the destination folder.
+3. Check the live preview below **Nomenclature**. It shows the first planned copy as the source name and the new name, then counts the files to copy and skip, including conflicts with files already in the destination folder. Problems such as an invalid template or identical folders appear in red in the same place, and **Renommer** stays disabled until both folders and a valid template are set.
+4. Click **Renommer**. A progress bar replaces the preview, and **Annuler** or the Escape key stops the batch after the current copy. The result then appears in the window: the number of copies created, the skipped files with the reason for each one (click the count to expand the list), and **Ouvrir le dossier d'arrivée** to open the destination folder. Changing a folder or the template brings the preview back.
 
 FileRenamer uses the last group of digits before the final extension and preserves leading zeroes. For example, `rapport.v2_004.pdf` yields `004`, and `clip.mp4` is skipped because its name before the extension has no number. Copies keep the source file's final extension, if any. The app processes visible files directly inside the source folder in case-insensitive name order.
 
-Use **Enregistrer** to save a template to the list and **Supprimer** to remove it. The app restores the last template used for a batch. The interface is in French and follows the Windows light or dark setting.
+Use **Enregistrer** to save a template to the list and **Supprimer** to remove it. The app restores the last folders and the last template used for a batch. The interface is in French and follows the Windows light or dark setting.
 
 ## Build and test
 
-Install CMake 3.16 or later, Ninja, a C++17 compiler, and Qt 6 with the Widgets and Test modules. Run these commands from the repository root.
+Install CMake 3.16 or later, Ninja, a C++17 compiler, and Qt 6 with the Widgets, Svg and Test modules. On Debian and Ubuntu, the Qt packages are `qt6-base-dev` and `qt6-svg-dev`. Run these commands from the repository root.
 
 ```sh
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release

@@ -1,7 +1,7 @@
 #include "mainwindow.h"
+#include "theme.h"
 
 #include <QApplication>
-#include <QFile>
 #include <QIcon>
 #include <QLibraryInfo>
 #include <QStringList>
@@ -25,17 +25,14 @@ bool loadFrenchTranslation(QTranslator &translator)
     return false;
 }
 
-void applySystemTheme(QApplication &app)
+void applySystemTheme()
 {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     const bool dark = QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark;
 #else
     const bool dark = QGuiApplication::palette().window().color().lightness() < 128;
 #endif
-    QFile stylesheet(dark ? QStringLiteral(":/style.qss") : QStringLiteral(":/light.qss"));
-    if (stylesheet.open(QIODevice::ReadOnly)) {
-        app.setStyleSheet(QString::fromUtf8(stylesheet.readAll()));
-    }
+    Theme::apply(dark);
 }
 
 }
@@ -52,10 +49,10 @@ int main(int argc, char *argv[])
     if (loadFrenchTranslation(french)) {
         app.installTranslator(&french);
     }
-    applySystemTheme(app);
+    applySystemTheme();
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     QObject::connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged,
-                     &app, [&app] { applySystemTheme(app); });
+                     &app, [] { applySystemTheme(); });
 #endif
 
     MainWindow window;

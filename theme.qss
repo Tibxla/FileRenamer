@@ -1,0 +1,422 @@
+/* Gabarit de la feuille de style. Chaque jeton (arobase suivie d'un nom) reçoit sa valeur claire
+   ou sombre dans theme.cpp ; un jeton inconnu y est signalé. */
+
+QMainWindow, QWidget#centralWidget {
+    background-color: @window;
+}
+
+QWidget {
+    color: @text;
+}
+
+QLabel {
+    background: transparent;
+}
+
+QLabel:disabled {
+    color: @disabledText;
+}
+
+/* En-tête */
+
+QLabel#titleLabel {
+    font-size: 15pt;
+    font-weight: 600;
+}
+
+QLabel#subtitleLabel {
+    color: @secondary;
+}
+
+/* Zones de dépôt */
+
+FolderDropZone {
+    qproperty-borderColor: @cardBorder;
+    qproperty-dashColor: @zoneDash;
+    qproperty-accentColor: @accent;
+    qproperty-fillColor: @card;
+    qproperty-hoverFillColor: @zoneHover;
+    qproperty-dropFillColor: @zoneDrop;
+    qproperty-focusColor: @focus;
+}
+
+QLabel#zoneTitle {
+    color: @secondary;
+    font-size: 9pt;
+}
+
+QLabel#zoneTitle[emphasis="true"] {
+    color: @text;
+    font-size: 10.5pt;
+    font-weight: 600;
+}
+
+QLabel#zoneHint, QLabel#zonePath {
+    color: @secondary;
+    font-size: 9pt;
+}
+
+QLabel#zoneName {
+    font-size: 11pt;
+    font-weight: 600;
+}
+
+QLabel#zoneTitle:disabled, QLabel#zoneHint:disabled, QLabel#zoneName:disabled, QLabel#zonePath:disabled {
+    color: @disabledText;
+}
+
+/* Cartes */
+
+QFrame#nomenclatureCard {
+    background-color: @card;
+    border: 1px solid @cardBorder;
+    border-radius: 8px;
+}
+
+QFrame#divider {
+    background-color: @divider;
+    border: none;
+}
+
+QLabel#nomenclatureLabel {
+    font-weight: 600;
+}
+
+QLabel#nomenclatureHint {
+    color: @secondary;
+    font-size: 9pt;
+}
+
+/* Aperçu */
+
+QFrame#exampleRow, QFrame#messageRow {
+    background-color: @inset;
+    border: 1px solid @divider;
+    border-radius: 6px;
+}
+
+QFrame#messageRow[error="true"] {
+    background-color: @criticalTint;
+    border-color: @criticalTint;
+}
+
+QLabel#exampleCaption {
+    color: @secondary;
+    font-size: 9pt;
+}
+
+QLabel#exampleSource {
+    color: @secondary;
+}
+
+QLabel#exampleOutput {
+    color: @accentText;
+    font-size: 11pt;
+    font-weight: 600;
+}
+
+QLabel#copyPill, QLabel#skipPill {
+    border-radius: 11px;
+    padding: 1px 10px;
+    min-height: 20px;
+    font-size: 9pt;
+    font-weight: 600;
+}
+
+QLabel#copyPill {
+    background-color: @accentTint;
+    color: @accentText;
+}
+
+QLabel#copyPill[none="true"] {
+    background-color: @subtle;
+    color: @secondary;
+}
+
+QLabel#skipPill {
+    background-color: @cautionTint;
+    color: @caution;
+}
+
+QLabel#messageLabel {
+    color: @text;
+}
+
+QLabel#messageLabel[error="true"] {
+    color: @critical;
+}
+
+QLabel#readyHint {
+    color: @secondary;
+    font-size: 9pt;
+}
+
+/* Progression et résultat */
+
+QLabel#progressLabel {
+    color: @secondary;
+}
+
+QProgressBar {
+    background-color: @track;
+    border: none;
+    border-radius: 2px;
+    max-height: 4px;
+    min-height: 4px;
+}
+
+QProgressBar::chunk {
+    background-color: @accent;
+    border-radius: 2px;
+}
+
+QLabel#resultLabel {
+    font-size: 11pt;
+    font-weight: 600;
+}
+
+QToolButton#ignoredToggle {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: @accentText;
+    padding: 1px 6px 1px 2px;
+}
+
+QToolButton#ignoredToggle:hover {
+    background-color: @subtle;
+}
+
+QToolButton#ignoredToggle:focus {
+    border: 1px solid @focus;
+}
+
+QPlainTextEdit#ignoredList {
+    background-color: @inset;
+    border: 1px solid @controlBorder;
+    border-radius: 6px;
+    color: @secondary;
+    padding: 4px 6px;
+    font-size: 9.5pt;
+    selection-background-color: @accent;
+    selection-color: @onAccent;
+}
+
+/* Boutons */
+
+QPushButton {
+    background-color: @control;
+    color: @text;
+    border: 1px solid @controlBorder;
+    border-bottom-color: @controlBorderBottom;
+    border-radius: 6px;
+    padding: 0 12px;
+    min-height: 30px;
+}
+
+QPushButton:hover {
+    background-color: @controlHover;
+}
+
+QPushButton:pressed {
+    background-color: @controlPressed;
+    color: @secondary;
+    border-bottom-color: @controlBorder;
+}
+
+QPushButton:disabled {
+    background-color: @controlDisabled;
+    color: @disabledText;
+    border-bottom-color: @controlBorder;
+}
+
+QPushButton:focus {
+    border: 2px solid @focus;
+    padding: 0 11px;
+}
+
+QPushButton#renameButton {
+    background-color: @accent;
+    color: @onAccent;
+    border: 1px solid @accent;
+    font-weight: 600;
+    min-height: 36px;
+    padding: 0 28px;
+}
+
+QPushButton#renameButton:hover {
+    background-color: @accentHover;
+    border-color: @accentHover;
+}
+
+QPushButton#renameButton:pressed {
+    background-color: @accentPressed;
+    border-color: @accentPressed;
+    color: @onAccentPressed;
+}
+
+QPushButton#renameButton:disabled {
+    background-color: @accentDisabled;
+    border-color: @accentDisabled;
+    color: @onAccentDisabled;
+}
+
+QPushButton#renameButton:focus {
+    border: 2px solid @focus;
+    padding: 0 27px;
+}
+
+/* Champ de nomenclature */
+
+QComboBox {
+    background-color: @input;
+    color: @text;
+    border: 1px solid @controlBorder;
+    border-bottom: 1px solid @inputBottom;
+    border-radius: 6px;
+    padding: 0 6px 1px 10px;
+    min-height: 34px;
+    selection-background-color: @accent;
+    selection-color: @onAccent;
+}
+
+QComboBox:hover {
+    background-color: @inputHover;
+}
+
+QComboBox:focus {
+    background-color: @inputFocus;
+    border-bottom: 2px solid @accent;
+    padding-bottom: 0;
+}
+
+QComboBox:disabled {
+    background-color: @controlDisabled;
+    color: @disabledText;
+    border-bottom-color: @controlBorder;
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    width: 30px;
+    border: none;
+    background: transparent;
+}
+
+QComboBox::down-arrow {
+    image: url(:/icons/combo-arrow-@scheme.svg);
+    width: 14px;
+    height: 14px;
+}
+
+QComboBox::down-arrow:disabled {
+    image: url(:/icons/combo-arrow-disabled-@scheme.svg);
+}
+
+QComboBox QLineEdit {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: @text;
+    selection-background-color: @accent;
+    selection-color: @onAccent;
+}
+
+QComboBox QAbstractItemView {
+    background-color: @popup;
+    color: @text;
+    border: 1px solid @popupBorder;
+    padding: 4px;
+    outline: 0;
+}
+
+QComboBox QAbstractItemView::item {
+    min-height: 32px;
+    padding: 0 8px;
+    border-radius: 4px;
+    color: @text;
+}
+
+QComboBox QAbstractItemView::item:hover, QComboBox QAbstractItemView::item:selected {
+    background-color: @subtle;
+    color: @text;
+}
+
+/* Barres de défilement, infobulles, menus */
+
+QScrollBar:vertical {
+    background: transparent;
+    width: 12px;
+    margin: 2px;
+}
+
+QScrollBar:horizontal {
+    background: transparent;
+    height: 12px;
+    margin: 2px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: @scrollHandle;
+    border-radius: 3px;
+    min-height: 24px;
+    margin: 0 2px;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: @scrollHandle;
+    border-radius: 3px;
+    min-width: 24px;
+    margin: 2px 0;
+}
+
+QScrollBar::handle:hover {
+    background-color: @scrollHandleHover;
+}
+
+QScrollBar::add-line, QScrollBar::sub-line {
+    width: 0;
+    height: 0;
+}
+
+QScrollBar::add-page, QScrollBar::sub-page {
+    background: none;
+}
+
+QToolTip {
+    background-color: @popup;
+    color: @text;
+    border: 1px solid @popupBorder;
+    padding: 4px 8px;
+}
+
+QMenu {
+    background-color: @popup;
+    color: @text;
+    border: 1px solid @popupBorder;
+    padding: 4px;
+}
+
+QMenu::item {
+    padding: 6px 28px 6px 12px;
+    border-radius: 4px;
+}
+
+QMenu::item:selected {
+    background-color: @subtle;
+}
+
+QMenu::item:disabled {
+    color: @disabledText;
+}
+
+QMenu::separator {
+    height: 1px;
+    background-color: @divider;
+    margin: 4px 8px;
+}
+
+QMessageBox {
+    background-color: @window;
+}

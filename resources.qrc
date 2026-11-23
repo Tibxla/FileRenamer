@@ -2,8 +2,21 @@
 <RCC version="1.0">
     <qresource>
         <file>icon.png</file>
-        <file>style.qss</file>
-        <file>light.qss</file>
-        <file>dropdown-arrow.xpm</file>
+        <file>theme.qss</file>
+        <file>icons/arrow-right.svg</file>
+        <file>icons/check-circle.svg</file>
+        <file>icons/chevron-down.svg</file>
+        <file>icons/chevron-right.svg</file>
+        <file>icons/combo-arrow-dark.svg</file>
+        <file>icons/combo-arrow-disabled-dark.svg</file>
+        <file>icons/combo-arrow-disabled-light.svg</file>
+        <file>icons/combo-arrow-light.svg</file>
+        <file>icons/delete.svg</file>
+        <file>icons/error.svg</file>
+        <file>icons/folder-open.svg</file>
+        <file>icons/folder.svg</file>
+        <file>icons/info.svg</file>
+        <file>icons/save.svg</file>
+        <file>icons/warning.svg</file>
     </qresource>
 </RCC>

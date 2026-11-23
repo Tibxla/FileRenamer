@@ -6,129 +6,465 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
-    <height>255</height>
+    <width>720</width>
+    <height>550</height>
    </rect>
-  </property>
-  <property name="minimumSize">
-   <size><width>520</width><height>220</height></size>
   </property>
   <property name="windowTitle">
    <string notr="true">FileRenamer</string>
   </property>
   <widget class="QWidget" name="centralWidget">
+   <property name="focusPolicy"><enum>Qt::ClickFocus</enum></property>
    <layout class="QVBoxLayout" name="windowLayout">
-    <property name="spacing"><number>16</number></property>
-    <property name="leftMargin"><number>20</number></property>
-    <property name="topMargin"><number>20</number></property>
-    <property name="rightMargin"><number>20</number></property>
-    <property name="bottomMargin"><number>20</number></property>
+    <property name="spacing"><number>0</number></property>
+    <property name="leftMargin"><number>24</number></property>
+    <property name="topMargin"><number>22</number></property>
+    <property name="rightMargin"><number>24</number></property>
+    <property name="bottomMargin"><number>24</number></property>
     <item>
-     <layout class="QGridLayout" name="renameForm">
-      <property name="horizontalSpacing"><number>8</number></property>
-      <property name="verticalSpacing"><number>8</number></property>
-      <item row="0" column="0">
-       <widget class="QLabel" name="sourceLabel">
-        <property name="text"><string>Dossier source</string></property>
-        <property name="buddy"><cstring>sourceDirLineEdit</cstring></property>
+     <widget class="QLabel" name="titleLabel">
+      <property name="text"><string>Renommer des fichiers</string></property>
+     </widget>
+    </item>
+    <item>
+     <spacer name="titleSpacer">
+      <property name="orientation"><enum>Qt::Vertical</enum></property>
+      <property name="sizeType"><enum>QSizePolicy::Fixed</enum></property>
+      <property name="sizeHint" stdset="0"><size><width>0</width><height>2</height></size></property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QLabel" name="subtitleLabel">
+      <property name="text"><string>Copie vos fichiers numérotés en les renommant. Les originaux ne sont jamais modifiés.</string></property>
+     </widget>
+    </item>
+    <item>
+     <spacer name="headerSpacer">
+      <property name="orientation"><enum>Qt::Vertical</enum></property>
+      <property name="sizeType"><enum>QSizePolicy::Fixed</enum></property>
+      <property name="sizeHint" stdset="0"><size><width>0</width><height>20</height></size></property>
+     </spacer>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="foldersLayout">
+      <property name="spacing"><number>10</number></property>
+      <item>
+       <widget class="FolderDropZone" name="sourceZone"/>
+      </item>
+      <item>
+       <widget class="IconView" name="foldersArrow">
+        <property name="minimumSize"><size><width>20</width><height>20</height></size></property>
+        <property name="maximumSize"><size><width>20</width><height>20</height></size></property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="FolderDropLineEdit" name="sourceDirLineEdit"/>
-      </item>
-      <item row="0" column="2" colspan="2">
-       <widget class="QPushButton" name="browseSourceButton">
-        <property name="accessibleName"><string>Parcourir le dossier source</string></property>
-        <property name="text"><string>Parcourir</string></property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="destLabel">
-        <property name="text"><string>Dossier d'arrivée</string></property>
-        <property name="buddy"><cstring>destDirLineEdit</cstring></property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="FolderDropLineEdit" name="destDirLineEdit"/>
-      </item>
-      <item row="1" column="2" colspan="2">
-       <widget class="QPushButton" name="browseDestButton">
-        <property name="accessibleName"><string>Parcourir le dossier d'arrivée</string></property>
-        <property name="text"><string>Parcourir</string></property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="nomenclatureLabel">
-        <property name="text"><string>Nomenclature</string></property>
-        <property name="buddy"><cstring>nomenclatureComboBox</cstring></property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QComboBox" name="nomenclatureComboBox">
-        <property name="editable"><bool>true</bool></property>
-        <property name="insertPolicy"><enum>QComboBox::NoInsert</enum></property>
-        <property name="sizeAdjustPolicy"><enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum></property>
-        <property name="minimumContentsLength"><number>14</number></property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QPushButton" name="saveNomenclatureButton">
-        <property name="text"><string>Enregistrer</string></property>
-        <property name="accessibleName"><string>Enregistrer la nomenclature</string></property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <widget class="QPushButton" name="removeNomenclatureButton">
-        <property name="text"><string>Supprimer</string></property>
-        <property name="accessibleName"><string>Supprimer la nomenclature</string></property>
-       </widget>
-      </item>
-      <item row="3" column="1" colspan="3">
-       <widget class="QLabel" name="renamePreview">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="textFormat"><enum>Qt::PlainText</enum></property>
-        <property name="alignment"><set>Qt::AlignLeft|Qt::AlignTop</set></property>
-        <property name="wordWrap"><bool>true</bool></property>
-       </widget>
+      <item>
+       <widget class="FolderDropZone" name="destZone"/>
       </item>
      </layout>
     </item>
     <item>
-     <spacer name="renameSpacer">
+     <spacer name="foldersSpacer">
       <property name="orientation"><enum>Qt::Vertical</enum></property>
+      <property name="sizeType"><enum>QSizePolicy::Fixed</enum></property>
+      <property name="sizeHint" stdset="0"><size><width>0</width><height>16</height></size></property>
      </spacer>
     </item>
-    <item alignment="Qt::AlignRight">
-     <widget class="QPushButton" name="renameButton">
-      <property name="minimumSize">
-       <size><width>110</width><height>0</height></size>
-      </property>
-      <property name="text"><string>Renommer</string></property>
+    <item>
+     <widget class="QFrame" name="nomenclatureCard">
+      <layout class="QVBoxLayout" name="cardLayout">
+       <property name="spacing"><number>0</number></property>
+       <property name="leftMargin"><number>20</number></property>
+       <property name="topMargin"><number>16</number></property>
+       <property name="rightMargin"><number>20</number></property>
+       <property name="bottomMargin"><number>18</number></property>
+       <item>
+        <layout class="QHBoxLayout" name="nomenclatureHeader">
+         <property name="spacing"><number>12</number></property>
+         <item>
+          <widget class="QLabel" name="nomenclatureLabel">
+           <property name="text"><string>Nomenclature</string></property>
+           <property name="buddy"><cstring>nomenclatureComboBox</cstring></property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="nomenclatureHeaderSpacer">
+           <property name="orientation"><enum>Qt::Horizontal</enum></property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="nomenclatureHint">
+           <property name="text"><string>{n} marque l'emplacement du numéro</string></property>
+           <property name="textFormat"><enum>Qt::PlainText</enum></property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="nomenclatureLabelSpacer">
+         <property name="orientation"><enum>Qt::Vertical</enum></property>
+         <property name="sizeType"><enum>QSizePolicy::Fixed</enum></property>
+         <property name="sizeHint" stdset="0"><size><width>0</width><height>8</height></size></property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="nomenclatureRow">
+         <property name="spacing"><number>8</number></property>
+         <item>
+          <widget class="QComboBox" name="nomenclatureComboBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="editable"><bool>true</bool></property>
+           <property name="insertPolicy"><enum>QComboBox::NoInsert</enum></property>
+           <property name="sizeAdjustPolicy"><enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum></property>
+           <property name="minimumContentsLength"><number>12</number></property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="saveNomenclatureButton">
+           <property name="focusPolicy"><enum>Qt::TabFocus</enum></property>
+           <property name="toolTip"><string>Ajouter cette nomenclature à la liste</string></property>
+           <property name="accessibleName"><string>Enregistrer la nomenclature</string></property>
+           <property name="text"><string>Enregistrer</string></property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="removeNomenclatureButton">
+           <property name="focusPolicy"><enum>Qt::TabFocus</enum></property>
+           <property name="toolTip"><string>Retirer cette nomenclature de la liste</string></property>
+           <property name="accessibleName"><string>Supprimer la nomenclature</string></property>
+           <property name="text"><string>Supprimer</string></property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="dividerTopSpacer">
+         <property name="orientation"><enum>Qt::Vertical</enum></property>
+         <property name="sizeType"><enum>QSizePolicy::Fixed</enum></property>
+         <property name="sizeHint" stdset="0"><size><width>0</width><height>16</height></size></property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QFrame" name="divider">
+         <property name="minimumSize"><size><width>0</width><height>1</height></size></property>
+         <property name="maximumSize"><size><width>16777215</width><height>1</height></size></property>
+         <property name="frameShape"><enum>QFrame::NoFrame</enum></property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="dividerBottomSpacer">
+         <property name="orientation"><enum>Qt::Vertical</enum></property>
+         <property name="sizeType"><enum>QSizePolicy::Fixed</enum></property>
+         <property name="sizeHint" stdset="0"><size><width>0</width><height>14</height></size></property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QStackedWidget" name="statusStack">
+         <widget class="QWidget" name="previewPage">
+          <layout class="QVBoxLayout" name="previewLayout">
+           <property name="spacing"><number>10</number></property>
+           <property name="leftMargin"><number>0</number></property>
+           <property name="topMargin"><number>0</number></property>
+           <property name="rightMargin"><number>0</number></property>
+           <property name="bottomMargin"><number>0</number></property>
+           <item>
+            <widget class="QFrame" name="messageRow">
+             <layout class="QHBoxLayout" name="messageLayout">
+              <property name="spacing"><number>10</number></property>
+              <property name="leftMargin"><number>14</number></property>
+              <property name="topMargin"><number>11</number></property>
+              <property name="rightMargin"><number>14</number></property>
+              <property name="bottomMargin"><number>11</number></property>
+              <item alignment="Qt::AlignTop">
+               <widget class="IconView" name="messageIcon">
+                <property name="minimumSize"><size><width>18</width><height>18</height></size></property>
+                <property name="maximumSize"><size><width>18</width><height>18</height></size></property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="messageLabel">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+                  <horstretch>1</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="textFormat"><enum>Qt::PlainText</enum></property>
+                <property name="wordWrap"><bool>true</bool></property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QFrame" name="exampleRow">
+             <layout class="QVBoxLayout" name="exampleBoxLayout">
+              <property name="spacing"><number>3</number></property>
+              <property name="leftMargin"><number>14</number></property>
+              <property name="topMargin"><number>10</number></property>
+              <property name="rightMargin"><number>14</number></property>
+              <property name="bottomMargin"><number>11</number></property>
+              <item>
+               <widget class="QLabel" name="exampleCaption">
+                <property name="text"><string>Exemple</string></property>
+               </widget>
+              </item>
+              <item>
+             <layout class="QHBoxLayout" name="exampleLayout">
+              <property name="spacing"><number>10</number></property>
+              <item>
+               <widget class="ElidedLabel" name="exampleSource"/>
+              </item>
+              <item>
+               <widget class="IconView" name="exampleArrow">
+                <property name="minimumSize"><size><width>16</width><height>16</height></size></property>
+                <property name="maximumSize"><size><width>16</width><height>16</height></size></property>
+               </widget>
+              </item>
+              <item>
+               <widget class="ElidedLabel" name="exampleOutput"/>
+              </item>
+              <item>
+               <spacer name="exampleSpacer">
+                <property name="orientation"><enum>Qt::Horizontal</enum></property>
+                <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
+               </spacer>
+              </item>
+             </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QWidget" name="countsRow" native="true">
+             <layout class="QHBoxLayout" name="countsLayout">
+              <property name="spacing"><number>8</number></property>
+              <property name="leftMargin"><number>0</number></property>
+              <property name="topMargin"><number>0</number></property>
+              <property name="rightMargin"><number>0</number></property>
+              <property name="bottomMargin"><number>0</number></property>
+              <item>
+               <widget class="QLabel" name="copyPill">
+                <property name="textFormat"><enum>Qt::PlainText</enum></property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="skipPill">
+                <property name="textFormat"><enum>Qt::PlainText</enum></property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="readyHint">
+                <property name="textFormat"><enum>Qt::PlainText</enum></property>
+                <property name="text"><string>Choisissez maintenant un dossier d'arrivée.</string></property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="countsSpacer">
+                <property name="orientation"><enum>Qt::Horizontal</enum></property>
+                <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <spacer name="previewSpacer">
+             <property name="orientation"><enum>Qt::Vertical</enum></property>
+             <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="progressPage">
+          <layout class="QVBoxLayout" name="progressLayout">
+           <property name="spacing"><number>12</number></property>
+           <property name="leftMargin"><number>0</number></property>
+           <property name="topMargin"><number>0</number></property>
+           <property name="rightMargin"><number>0</number></property>
+           <property name="bottomMargin"><number>0</number></property>
+           <item>
+            <layout class="QHBoxLayout" name="progressHeader">
+             <property name="spacing"><number>12</number></property>
+             <item>
+              <widget class="QLabel" name="progressLabel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+                 <horstretch>1</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="textFormat"><enum>Qt::PlainText</enum></property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="cancelButton">
+               <property name="focusPolicy"><enum>Qt::TabFocus</enum></property>
+               <property name="toolTip"><string>Arrêter après la copie en cours (Échap)</string></property>
+               <property name="text"><string>Annuler</string></property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QProgressBar" name="progressBar">
+             <property name="textVisible"><bool>false</bool></property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="progressSpacer">
+             <property name="orientation"><enum>Qt::Vertical</enum></property>
+             <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="resultPage">
+          <layout class="QVBoxLayout" name="resultLayout">
+           <property name="spacing"><number>2</number></property>
+           <property name="leftMargin"><number>0</number></property>
+           <property name="topMargin"><number>0</number></property>
+           <property name="rightMargin"><number>0</number></property>
+           <property name="bottomMargin"><number>0</number></property>
+           <item>
+            <layout class="QHBoxLayout" name="resultHeader">
+             <property name="spacing"><number>10</number></property>
+             <item>
+              <widget class="IconView" name="resultIcon">
+               <property name="minimumSize"><size><width>22</width><height>22</height></size></property>
+               <property name="maximumSize"><size><width>22</width><height>22</height></size></property>
+              </widget>
+             </item>
+             <item>
+              <widget class="ElidedLabel" name="resultLabel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>1</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="openFolderButton">
+               <property name="focusPolicy"><enum>Qt::TabFocus</enum></property>
+               <property name="text"><string>Ouvrir le dossier d'arrivée</string></property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="ignoredRow">
+             <property name="spacing"><number>0</number></property>
+             <property name="leftMargin"><number>26</number></property>
+             <item>
+              <widget class="QToolButton" name="ignoredToggle">
+               <property name="focusPolicy"><enum>Qt::TabFocus</enum></property>
+               <property name="toolTip"><string>Afficher la raison de chaque fichier ignoré</string></property>
+               <property name="checkable"><bool>true</bool></property>
+               <property name="toolButtonStyle"><enum>Qt::ToolButtonTextBesideIcon</enum></property>
+               <property name="autoRaise"><bool>true</bool></property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="ignoredRowSpacer">
+               <property name="orientation"><enum>Qt::Horizontal</enum></property>
+               <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QPlainTextEdit" name="ignoredList">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>1</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="accessibleName"><string>Fichiers ignorés et leur raison</string></property>
+             <property name="readOnly"><bool>true</bool></property>
+             <property name="lineWrapMode"><enum>QPlainTextEdit::WidgetWidth</enum></property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="resultSpacer">
+             <property name="orientation"><enum>Qt::Vertical</enum></property>
+             <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
      </widget>
+    </item>
+    <item>
+     <spacer name="cardSpacer">
+      <property name="orientation"><enum>Qt::Vertical</enum></property>
+      <property name="sizeType"><enum>QSizePolicy::Fixed</enum></property>
+      <property name="sizeHint" stdset="0"><size><width>0</width><height>16</height></size></property>
+     </spacer>
+    </item>
+    <item>
+     <spacer name="bottomSpacer">
+      <property name="orientation"><enum>Qt::Vertical</enum></property>
+      <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
+     </spacer>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="actionsLayout">
+      <property name="spacing"><number>12</number></property>
+      <item>
+       <spacer name="actionsSpacer">
+        <property name="orientation"><enum>Qt::Horizontal</enum></property>
+        <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="renameButton">
+        <property name="focusPolicy"><enum>Qt::TabFocus</enum></property>
+        <property name="minimumSize"><size><width>140</width><height>0</height></size></property>
+        <property name="text"><string>Renommer</string></property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>FolderDropLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header>folderdroplineedit.h</header>
+   <class>FolderDropZone</class>
+   <extends>QWidget</extends>
+   <header>folderdropzone.h</header>
+  </customwidget>
+  <customwidget>
+   <class>IconView</class>
+   <extends>QWidget</extends>
+   <header>iconview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ElidedLabel</class>
+   <extends>QLabel</extends>
+   <header>elidedlabel.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>sourceDirLineEdit</tabstop>
-  <tabstop>browseSourceButton</tabstop>
-  <tabstop>destDirLineEdit</tabstop>
-  <tabstop>browseDestButton</tabstop>
+  <tabstop>sourceZone</tabstop>
+  <tabstop>destZone</tabstop>
   <tabstop>nomenclatureComboBox</tabstop>
   <tabstop>saveNomenclatureButton</tabstop>
   <tabstop>removeNomenclatureButton</tabstop>
+  <tabstop>cancelButton</tabstop>
+  <tabstop>ignoredToggle</tabstop>
+  <tabstop>openFolderButton</tabstop>
+  <tabstop>ignoredList</tabstop>
   <tabstop>renameButton</tabstop>
  </tabstops>
  <resources/>
