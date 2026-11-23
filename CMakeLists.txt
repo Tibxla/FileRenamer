@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(FileRenamer VERSION 1.2.0 LANGUAGES CXX)
+project(FileRenamer VERSION 1.3.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -69,3 +69,17 @@ add_executable(filerenamer_tests tests/filerenamer_tests.cpp)
 target_link_libraries(filerenamer_tests PRIVATE filerenamer_core Qt6::Test)
 add_test(NAME filerenamer_tests COMMAND filerenamer_tests)
 set_tests_properties(filerenamer_tests PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+# Tests d'interface : la vraie fenêtre, compilée une seconde fois avec ses ressources.
+add_executable(filerenamer_ui_tests
+    tests/mainwindow_tests.cpp
+    mainwindow.h
+    mainwindow.cpp
+    mainwindow.ui
+    theme.h
+    theme.cpp
+    resources.qrc
+)
+target_link_libraries(filerenamer_ui_tests PRIVATE filerenamer_core Qt6::Svg Qt6::Test)
+add_test(NAME filerenamer_ui_tests COMMAND filerenamer_ui_tests)
+set_tests_properties(filerenamer_ui_tests PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

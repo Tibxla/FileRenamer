@@ -59,6 +59,10 @@ QString skipReasonText(RenameCore::SkipReason reason)
         return MainWindow::tr("Une entrée du même nom existe déjà dans le dossier d'arrivée.");
     case RenameCore::SkipReason::DuplicateOutput:
         return MainWindow::tr("Un fichier source précédent produit le même nom de copie.");
+    case RenameCore::SkipReason::OutsideSeries:
+        return MainWindow::tr("Le fichier ne fait pas partie de la série retenue.");
+    case RenameCore::SkipReason::PrefixMismatch:
+        return MainWindow::tr("Le nom du fichier ne commence pas par le début de nom imposé.");
     }
     Q_UNREACHABLE();
 }
@@ -66,6 +70,49 @@ QString skipReasonText(RenameCore::SkipReason reason)
 QString ignoredFileDetail(const QString &name, const QString &reason)
 {
     return singleLineText(QStringLiteral("%1 → %2").arg(name, reason));
+}
+
+QString fileCount(qsizetype count)
+{
+    return count == 0 ? MainWindow::tr("aucun fichier")
+         : count == 1 ? MainWindow::tr("1 fichier") : MainWindow::tr("%1 fichiers").arg(count);
+}
+
+// Liste courte des séries pour une phrase : trois au plus, chacune raccourcie si elle est longue.
+QString seriesList(const QList<RenameCore::Series> &series)
+{
+    constexpr qsizetype shown = 3;
+    constexpr qsizetype maxLength = 24;
+    QStringList patterns;
+    for (qsizetype index = 0; index < qMin(shown, series.size()); ++index) {
+        QString pattern = singleLineText(series.at(index).pattern);
+        if (pattern.size() > maxLength) {
+            pattern = pattern.left(maxLength - 1) + QStringLiteral("…");
+        }
+        patterns.append(pattern);
+    }
+    QString list = patterns.join(QStringLiteral(", "));
+    if (series.size() > shown) {
+        const qsizetype others = series.size() - shown;
+        list += others == 1 ? MainWindow::tr(" et 1 autre") : MainWindow::tr(" et %1 autres").arg(others);
+    }
+    return list;
+}
+
+// Liste complète, une série par ligne, pour l'infobulle.
+QString seriesToolTip(const QList<RenameCore::Series> &series)
+{
+    QStringList lines;
+    for (const auto &entry : series) {
+        lines.append(MainWindow::tr("%1 : %2").arg(singleLineText(entry.pattern), fileCount(entry.size)));
+    }
+    return Qt::convertFromPlainText(lines.join(QLatin1Char('\n')), Qt::WhiteSpaceNormal);
+}
+
+// Début du nom des fichiers d'une série (« paris_… » donne « paris_ »).
+QString seriesStart(const QString &pattern)
+{
+    return pattern.left(pattern.indexOf(QChar(0x2026)));
 }
 
 void repolish(QWidget *widget)
@@ -118,6 +165,15 @@ MainWindow::MainWindow(QWidget *parent)
     ui->openFolderButton->setIcon(Theme::icon(QStringLiteral("folder-open"), Theme::Role::Text));
     ui->openFolderButton->setIconSize(buttonIconSize);
     ui->ignoredToggle->setIconSize(buttonIconSize);
+    ui->warningIcon->setIcon(Theme::icon(QStringLiteral("warning"), Theme::Role::Caution));
+    ui->prefixResetButton->setIcon(Theme::icon(QStringLiteral("arrow-undo")));
+    ui->prefixResetButton->setIconSize(QSize(14, 14));
+    ui->warningLabel->setElideMode(Qt::ElideRight);
+    ui->seriesLabel->setElideMode(Qt::ElideMiddle);
+    ui->seriesLabel->setToolTipWhenElided(true);
+    ui->prefixEdit->setPlaceholderText(QStringLiteral("paris_"));
+    ui->prefixRow->hide();
+    ui->tieButton->hide();
     ui->progressBar->setTextVisible(false);
     ui->ignoredList->document()->setDocumentMargin(2);
 
@@ -153,6 +209,7 @@ MainWindow::MainWindow(QWidget *parent)
         ui->messageRow->hide();
         ui->exampleRow->hide();
         ui->countsRow->hide();
+        ui->seriesBox->hide();
         ui->renameButton->setEnabled(false);
         previewRefreshTimer.start();
     }
@@ -163,6 +220,15 @@ MainWindow::MainWindow(QWidget *parent)
             previewRefreshTimer.start();
         });
     }
+    // Le début de nom imposé ne vaut que pour le dossier source où il a été saisi.
+    connect(ui->sourceZone, &FolderDropZone::pathChanged, this, [this] { setPrefixOpen(false); });
+    connect(ui->modifyButton, &QToolButton::clicked, this, [this] { setPrefixOpen(true, true); });
+    connect(ui->tieButton, &QToolButton::clicked, this, [this] { setPrefixOpen(true, true); });
+    connect(ui->prefixResetButton, &QToolButton::clicked, this, [this] { setPrefixOpen(false); });
+    connect(ui->prefixEdit, &QLineEdit::textChanged, this, [this] {
+        inputsChanged();
+        updatePreview();
+    });
     connect(ui->sourceZone, &FolderDropZone::browseRequested, this, [this] {
         browseDirectory(ui->sourceZone, tr("Sélectionner le dossier source"));
     });
@@ -308,12 +374,23 @@ void MainWindow::updatePreview()
         showMessage(tr("Saisissez une nomenclature, avec {n} à l'endroit du numéro."), false);
     } else if (!error.isEmpty()) {
         showMessage(error, true);
+    } else if (const auto plan = RenameCore::plan(previewSourceNames, previewExistingNames, nomenclature,
+                                                  imposedPrefix());
+               plan.seriesStatus == RenameCore::SeriesStatus::Tie) {
+        ui->prefixEdit->setPlaceholderText(seriesStart(plan.otherSeries.constFirst().pattern));
+        showMessage(tr("Plusieurs séries de même taille (%1). Séparez-les dans deux dossiers ou imposez "
+                       "un début de nom.").arg(seriesList(plan.otherSeries)), true, true);
+    } else if (plan.seriesStatus == RenameCore::SeriesStatus::NoNumberedFile) {
+        showMessage(previewSourceNames.isEmpty()
+                        ? tr("Ce dossier source ne contient aucun fichier.")
+                        : tr("Aucun fichier numéroté dans ce dossier source : il n'y a rien à copier."),
+                    false);
     } else {
-        const auto plan = RenameCore::plan(previewSourceNames, previewExistingNames, nomenclature);
         const qsizetype copyCount = plan.copies.size();
         const qsizetype skipCount = plan.skipped.size();
 
         ui->messageRow->hide();
+        showSeries(plan);
         ui->exampleRow->setVisible(copyCount > 0);
         if (copyCount > 0) {
             const auto &first = plan.copies.constFirst();
@@ -326,16 +403,76 @@ void MainWindow::updatePreview()
         ui->skipPill->setVisible(skipCount > 0);
         ui->readyHint->setVisible(ui->destZone->isEmpty());
         ui->countsRow->show();
-        ui->previewPage->setAccessibleDescription(RenameCore::previewText(plan));
+        ui->previewPage->setAccessibleDescription(RenameCore::previewText(plan) + QLatin1Char('\n')
+                                                  + ui->seriesLabel->fullText());
         ready = !ui->destZone->isEmpty() && copyCount + skipCount > 0;
     }
     ui->renameButton->setEnabled(ready && !copying);
 }
 
-void MainWindow::showMessage(const QString &text, bool error)
+void MainWindow::showSeries(const RenameCore::Plan &plan)
+{
+    if (plan.seriesStatus == RenameCore::SeriesStatus::PrefixImposed) {
+        const qsizetype matching = previewSourceNames.size()
+            - std::count_if(plan.skipped.cbegin(), plan.skipped.cend(), [](const RenameCore::SkippedFile &file) {
+                  return file.reason == RenameCore::SkipReason::PrefixMismatch;
+              });
+        ui->seriesLabel->setFullText(tr("Début de nom imposé : « %1 » · %2")
+                                         .arg(singleLineText(imposedPrefix()), fileCount(matching)));
+    } else {
+        ui->seriesLabel->setFullText(tr("Série : %1 · %2")
+                                         .arg(singleLineText(plan.series.pattern), fileCount(plan.series.size)));
+        const QString start = seriesStart(plan.series.pattern);
+        if (!start.trimmed().isEmpty()) {
+            ui->prefixEdit->setPlaceholderText(singleLineText(start));
+        }
+    }
+
+    const bool others = plan.seriesStatus == RenameCore::SeriesStatus::Dominant && !plan.otherSeries.isEmpty();
+    if (others) {
+        const qsizetype count = plan.otherSeries.size();
+        const QString list = seriesList(plan.otherSeries);
+        ui->warningLabel->setFullText(count == 1 ? tr("1 autre série ignorée (%1)").arg(list)
+                                                 : tr("%1 autres séries ignorées (%2)").arg(count).arg(list));
+        ui->warningRow->setToolTip(seriesToolTip(plan.otherSeries));
+    }
+    ui->warningRow->setVisible(others);
+    ui->seriesRow->show();
+    ui->modifyButton->setVisible(!prefixOpen);
+    ui->seriesBox->show();
+}
+
+void MainWindow::setPrefixOpen(bool open, bool focus)
+{
+    prefixOpen = open;
+    if (!open) {
+        ui->prefixEdit->clear();
+    }
+    ui->prefixRow->setVisible(open);
+    ui->modifyButton->setVisible(!open);
+    if (open) {
+        ui->seriesBox->show();
+    }
+    if (focus) {
+        ui->prefixEdit->setFocus(Qt::OtherFocusReason);
+    }
+    updatePreview();
+}
+
+QString MainWindow::imposedPrefix() const
+{
+    // Champ replié : il est vide, la détection automatique s'applique.
+    return ui->prefixEdit->text();
+}
+
+void MainWindow::showMessage(const QString &text, bool error, bool offerPrefix)
 {
     ui->exampleRow->hide();
     ui->countsRow->hide();
+    ui->seriesRow->hide();
+    ui->warningRow->hide();
+    ui->seriesBox->setVisible(prefixOpen);
+    ui->tieButton->setVisible(offerPrefix && !prefixOpen);
     ui->messageIcon->setIcon(error ? Theme::icon(QStringLiteral("error"), Theme::Role::Critical)
                                    : Theme::icon(QStringLiteral("info"), Theme::Role::Secondary));
     ui->messageLabel->setText(text);
@@ -370,6 +507,10 @@ void MainWindow::setBusy(bool busy)
     ui->sourceZone->setEnabled(!busy);
     ui->destZone->setEnabled(!busy);
     ui->nomenclatureComboBox->setEnabled(!busy);
+    for (QWidget *widget : {static_cast<QWidget *>(ui->prefixEdit), static_cast<QWidget *>(ui->prefixResetButton),
+                            static_cast<QWidget *>(ui->modifyButton), static_cast<QWidget *>(ui->tieButton)}) {
+        widget->setEnabled(!busy);
+    }
     updateNomenclatureButtons();
     if (busy) {
         ui->renameButton->setEnabled(false);
@@ -459,7 +600,14 @@ void MainWindow::renameFiles()
         return;
     }
 
-    const auto plan = RenameCore::plan(readSourceNames(source), readExistingNames(destination), nomenclature);
+    const auto plan = RenameCore::plan(readSourceNames(source), readExistingNames(destination), nomenclature,
+                                       imposedPrefix());
+    if (plan.seriesStatus == RenameCore::SeriesStatus::Tie) {
+        // Le dossier a changé depuis l'aperçu : l'égalité s'affiche, rien n'est copié.
+        showPanel(Panel::Preview);
+        refreshPreviewDirectories();
+        return;
+    }
     nomenclatures.setLastUsed(nomenclature);
 
     QStringList ignored;

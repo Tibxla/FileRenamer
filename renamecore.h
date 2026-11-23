@@ -9,7 +9,9 @@ namespace RenameCore {
 enum class SkipReason {
     NoNumber,
     AlreadyExists,
-    DuplicateOutput
+    DuplicateOutput,
+    OutsideSeries,
+    PrefixMismatch
 };
 
 struct PlannedCopy {
@@ -22,9 +24,25 @@ struct SkippedFile {
     SkipReason reason;
 };
 
+struct Series {
+    QString pattern;
+    qsizetype size = 0;
+};
+
+enum class SeriesStatus {
+    NoNumberedFile,
+    Single,
+    Dominant,
+    Tie,
+    PrefixImposed
+};
+
 struct Plan {
     QList<PlannedCopy> copies;
     QList<SkippedFile> skipped;
+    SeriesStatus seriesStatus = SeriesStatus::NoNumberedFile;
+    Series series;
+    QList<Series> otherSeries;
 };
 
 struct DirectoryPaths {
@@ -33,12 +51,14 @@ struct DirectoryPaths {
 };
 
 QString extractNumber(const QString &fileName);
+// Writes a numéro on at least three digits: "1" -> "001", "0001" -> "001", "1234" stays.
+QString formatNumber(const QString &digits);
 QString validateNomenclature(const QString &nomenclature);
 QString normalizeNomenclature(const QString &nomenclature);
 
-// Source names must already be sorted and the nomenclature validated.
+// Source names are processed in the supplied order. The nomenclature must be validated.
 Plan plan(const QStringList &sourceNames, const QStringList &existingNames,
-          const QString &nomenclature);
+          const QString &nomenclature, const QString &imposedPrefix = QString());
 
 QString previewText(const Plan &plan);
 
