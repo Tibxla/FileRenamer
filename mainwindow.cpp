@@ -4,12 +4,17 @@
 #include "ui_mainwindow.h"
 
 #include <QApplication>
+#include <QDesktopServices>
 #include <QDir>
+#include <QEvent>
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QProgressDialog>
+#include <QStyle>
+#include <QTextDocument>
+#include <QUrl>
 
 #include <algorithm>
 
@@ -19,6 +24,27 @@ RenameCore::DirectoryPaths directoryPaths(const QString &path)
 {
     const QString absolute = QDir::cleanPath(QFileInfo(path).absoluteFilePath());
     return {absolute, QFileInfo(absolute).canonicalFilePath()};
+}
+
+QStringList readSourceNames(const QDir &source)
+{
+    QStringList names = source.entryList(QDir::Files, QDir::NoSort);
+    std::sort(names.begin(), names.end(), [](const QString &left, const QString &right) {
+        const int order = left.compare(right, Qt::CaseInsensitive);
+        return order == 0 ? left < right : order < 0;
+    });
+    return names;
+}
+
+QStringList readExistingNames(const QDir &destination)
+{
+    return destination.entryList(QDir::AllEntries | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot,
+                                 QDir::NoSort);
+}
+
+QString sameDirectoryMessage()
+{
+    return MainWindow::tr("Choisissez un dossier d'arrivée différent du dossier source.");
 }
 
 QString skipReasonText(RenameCore::SkipReason reason)
@@ -67,10 +93,19 @@ MainWindow::MainWindow(QWidget *parent)
     combo->setEditText(lastUsed);
     updateNomenclatureButtons();
 
-    const bool light = settings.value(QStringLiteral("theme")).toString() == QStringLiteral("light");
-    ui->lightThemeRadioButton->setChecked(light);
-    ui->darkThemeRadioButton->setChecked(!light);
-    applyTheme(light);
+    ui->renamePreview->installEventFilter(this);
+    updatePreview();
+    previewRefreshTimer.setSingleShot(true);
+    previewRefreshTimer.setTimerType(Qt::PreciseTimer);
+    previewRefreshTimer.setInterval(250);
+    connect(&previewRefreshTimer, &QTimer::timeout, this, &MainWindow::refreshPreviewDirectories);
+    connect(ui->sourceDirLineEdit, &QLineEdit::textChanged,
+            &previewRefreshTimer, qOverload<>(&QTimer::start));
+    connect(ui->destDirLineEdit, &QLineEdit::textChanged,
+            &previewRefreshTimer, qOverload<>(&QTimer::start));
+    if (!ui->sourceDirLineEdit->text().isEmpty()) {
+        previewRefreshTimer.start();
+    }
 
     connect(ui->browseSourceButton, &QPushButton::clicked, this, [this] {
         browseDirectory(ui->sourceDirLineEdit, tr("Sélectionner le dossier source"));
@@ -82,10 +117,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->saveNomenclatureButton, &QPushButton::clicked, this, &MainWindow::saveNomenclature);
     connect(ui->removeNomenclatureButton, &QPushButton::clicked, this, &MainWindow::removeNomenclature);
     connect(combo, &QComboBox::currentTextChanged, this, &MainWindow::updateNomenclatureButtons);
-    connect(ui->lightThemeRadioButton, &QRadioButton::toggled, this, [this](bool checked) {
-        applyTheme(checked);
-        settings.setValue(QStringLiteral("theme"), checked ? QStringLiteral("light") : QStringLiteral("dark"));
-    });
+    connect(combo, &QComboBox::currentTextChanged, this, &MainWindow::updatePreview);
 }
 
 MainWindow::~MainWindow()
@@ -95,18 +127,20 @@ MainWindow::~MainWindow()
     settings.setValue(QStringLiteral("geometry"), saveGeometry());
 }
 
-void MainWindow::applyTheme(bool light)
+bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 {
-    QFile style(light ? QStringLiteral(":/light.qss") : QStringLiteral(":/style.qss"));
-    if (style.open(QIODevice::ReadOnly)) {
-        qApp->setStyleSheet(QString::fromUtf8(style.readAll()));
+    if (watched == ui->renamePreview &&
+        (event->type() == QEvent::Resize || event->type() == QEvent::FontChange)) {
+        fitPreview();
     }
+    return QMainWindow::eventFilter(watched, event);
 }
 
 void MainWindow::browseDirectory(QLineEdit *field, const QString &title)
 {
     const QString initialPath = field->text().isEmpty() ? QDir::homePath() : field->text();
-    const QString selected = QFileDialog::getExistingDirectory(this, title, initialPath);
+    const QString selected = QFileDialog::getExistingDirectory(
+        this, title, initialPath, QFileDialog::ShowDirsOnly);
     if (!selected.isEmpty()) {
         field->setText(selected);
     }
@@ -149,6 +183,88 @@ void MainWindow::updateNomenclatureButtons()
     ui->removeNomenclatureButton->setEnabled(saved);
 }
 
+void MainWindow::refreshPreviewDirectories()
+{
+    const QString sourceText = ui->sourceDirLineEdit->text();
+    const QString destText = ui->destDirLineEdit->text();
+    const auto sourcePaths = directoryPaths(sourceText);
+    const QDir source(sourcePaths.absolutePath);
+    previewSourceExists = !sourceText.isEmpty() && source.exists();
+    previewSameDirectory = false;
+    previewSourceNames.clear();
+    previewExistingNames.clear();
+
+    if (previewSourceExists) {
+        const auto destPaths = directoryPaths(destText);
+        previewSameDirectory = !destText.isEmpty() && RenameCore::sameDirectory(sourcePaths, destPaths);
+        if (!previewSameDirectory) {
+            previewSourceNames = readSourceNames(source);
+            if (!destText.isEmpty()) {
+                previewExistingNames = readExistingNames(QDir(destPaths.absolutePath));
+            }
+        }
+    }
+    updatePreview();
+}
+
+void MainWindow::updatePreview()
+{
+    if (previewRefreshTimer.isActive()) {
+        return;
+    }
+    if (!previewSourceExists) {
+        setPreview(tr("Choisissez un dossier source pour voir un exemple."));
+        return;
+    }
+    if (previewSameDirectory) {
+        setPreview(sameDirectoryMessage(), true);
+        return;
+    }
+
+    const QString nomenclature = ui->nomenclatureComboBox->currentText();
+    if (nomenclature.isEmpty()) {
+        setPreview(tr("Saisissez une nomenclature, avec {n} à l'endroit du numéro."));
+        return;
+    }
+    const QString error = RenameCore::validateNomenclature(nomenclature);
+    if (!error.isEmpty()) {
+        setPreview(error, true);
+        return;
+    }
+
+    const auto plan = RenameCore::plan(previewSourceNames, previewExistingNames, nomenclature);
+    setPreview(RenameCore::previewText(plan));
+}
+
+void MainWindow::setPreview(const QString &text, bool error)
+{
+    auto *label = ui->renamePreview;
+    if (label->property("previewError").toBool() != error) {
+        label->setProperty("previewError", error);
+        label->style()->unpolish(label);
+        label->style()->polish(label);
+    }
+    previewText = text;
+    label->setAccessibleName(text);
+    fitPreview();
+}
+
+void MainWindow::fitPreview()
+{
+    auto *label = ui->renamePreview;
+    const auto metrics = label->fontMetrics();
+    label->setMinimumHeight(2 * metrics.lineSpacing());
+    QString visibleText = previewText;
+    const qsizetype lineBreak = previewText.indexOf(QLatin1Char('\n'));
+    if (lineBreak >= 0) {
+        const QString example = previewText.first(lineBreak);
+        const QString elided = metrics.elidedText(example, Qt::ElideMiddle, label->contentsRect().width());
+        visibleText = elided + previewText.sliced(lineBreak);
+    }
+    label->setText(visibleText);
+    label->setToolTip(visibleText == previewText ? QString() : Qt::convertFromPlainText(previewText));
+}
+
 void MainWindow::renameFiles()
 {
     const QString nomenclature = ui->nomenclatureComboBox->currentText();
@@ -176,8 +292,7 @@ void MainWindow::renameFiles()
     }
 
     if (RenameCore::sameDirectory(sourcePaths, destPaths)) {
-        QMessageBox::warning(this, tr("Dossiers identiques"),
-                             tr("Choisissez un dossier d'arrivée différent du dossier source."));
+        QMessageBox::warning(this, tr("Dossiers identiques"), sameDirectoryMessage());
         return;
     }
     if (!destination.exists() && !destination.mkpath(QStringLiteral("."))) {
@@ -186,14 +301,7 @@ void MainWindow::renameFiles()
         return;
     }
 
-    QStringList sourceNames = source.entryList(QDir::Files, QDir::NoSort);
-    std::sort(sourceNames.begin(), sourceNames.end(), [](const QString &left, const QString &right) {
-        const int order = left.compare(right, Qt::CaseInsensitive);
-        return order == 0 ? left < right : order < 0;
-    });
-    const QStringList existingNames = destination.entryList(
-        QDir::AllEntries | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot, QDir::NoSort);
-    const auto plan = RenameCore::plan(sourceNames, existingNames, nomenclature);
+    const auto plan = RenameCore::plan(readSourceNames(source), readExistingNames(destination), nomenclature);
     nomenclatures.setLastUsed(nomenclature);
 
     QStringList ignored;
@@ -246,5 +354,18 @@ void MainWindow::renameFiles()
     if (!ignored.isEmpty()) {
         summary.setDetailedText(ignored.join(QLatin1Char('\n')));
     }
+    if (copied > 0) {
+        auto *openFolder = summary.addButton(tr("Ouvrir le dossier d'arrivée"), QMessageBox::ActionRole);
+        summary.setDefaultButton(QMessageBox::Ok);
+        summary.setEscapeButton(QMessageBox::Ok);
+        const QUrl folderUrl = QUrl::fromLocalFile(destination.absolutePath());
+        connect(&summary, &QMessageBox::buttonClicked, &summary,
+                [openFolder, folderUrl](QAbstractButton *button) {
+            if (button == openFolder) {
+                QDesktopServices::openUrl(folderUrl);
+            }
+        });
+    }
+    previewRefreshTimer.start();
     summary.exec();
 }

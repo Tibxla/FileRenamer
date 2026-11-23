@@ -40,6 +40,8 @@ QString normalizeNomenclature(const QString &nomenclature);
 Plan plan(const QStringList &sourceNames, const QStringList &existingNames,
           const QString &nomenclature);
 
+QString previewText(const Plan &plan);
+
 // The caller resolves absolute and, where available, canonical paths.
 bool sameDirectory(const DirectoryPaths &source, const DirectoryPaths &destination);
 

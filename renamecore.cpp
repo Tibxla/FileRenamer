@@ -89,6 +89,37 @@ Plan plan(const QStringList &sourceNames, const QStringList &existingNames,
     return result;
 }
 
+QString previewText(const Plan &plan)
+{
+    const qsizetype copyCount = plan.copies.size();
+    QString count;
+    if (copyCount == 0) {
+        count = QStringLiteral("Aucun fichier à copier");
+    } else if (copyCount == 1) {
+        count = QStringLiteral("1 fichier à copier");
+    } else {
+        count = QStringLiteral("%1 fichiers à copier").arg(copyCount);
+    }
+
+    const qsizetype skippedCount = plan.skipped.size();
+    if (skippedCount > 0) {
+        const QString skipped = skippedCount == 1 ? QStringLiteral("1 ignoré")
+                                                  : QStringLiteral("%1 ignorés").arg(skippedCount);
+        count += QStringLiteral(", ") + skipped;
+    }
+    if (plan.copies.isEmpty()) {
+        return count;
+    }
+
+    const auto &copy = plan.copies.constFirst();
+    QString example = QStringLiteral("Exemple : %1 → %2").arg(copy.sourceName, copy.outputName);
+    example.replace(QLatin1Char('\n'), QStringLiteral("\\n"))
+           .replace(QLatin1Char('\r'), QStringLiteral("\\r"))
+           .replace(QChar::LineSeparator, QStringLiteral("\\u2028"))
+           .replace(QChar::ParagraphSeparator, QStringLiteral("\\u2029"));
+    return example + QLatin1Char('\n') + count;
+}
+
 bool sameDirectory(const DirectoryPaths &source, const DirectoryPaths &destination)
 {
     const bool bothCanonical = !source.canonicalPath.isEmpty() && !destination.canonicalPath.isEmpty();

@@ -50,8 +50,11 @@ jobs:
         run: |
           New-Item -ItemType Directory -Path build/deploy
           Copy-Item build/FileRenamer.exe build/deploy/
-          windeployqt --release build/deploy/FileRenamer.exe
+          windeployqt --release --translations fr build/deploy/FileRenamer.exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (!(Test-Path -LiteralPath build/deploy/translations/qt_fr.qm -PathType Leaf)) {
+            throw "Missing French Qt translation in the deployment directory."
+          }
           Compress-Archive -Path build/deploy/* -DestinationPath FileRenamer-windows.zip
       - uses: actions/upload-artifact@v4
         with:

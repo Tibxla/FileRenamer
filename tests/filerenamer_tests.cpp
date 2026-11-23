@@ -23,6 +23,8 @@ private slots:
     void planSkipsSourceWithoutNumber();
     void planSkipsExistingNameRegardlessOfCase();
     void planKeepsFirstSourceRegardlessOfExtensionCase();
+    void previewText_data();
+    void previewText();
     void invalidNomenclature_data();
     void invalidNomenclature();
     void sameDirectory();
@@ -101,6 +103,41 @@ void FileRenamerTests::planKeepsFirstSourceRegardlessOfExtensionCase()
     QCOMPARE(plan.skipped.size(), 1);
     QCOMPARE(plan.skipped.constFirst().sourceName, QString("B_1.pdf"));
     QCOMPARE(plan.skipped.constFirst().reason, RenameCore::SkipReason::DuplicateOutput);
+}
+
+void FileRenamerTests::previewText_data()
+{
+    QTest::addColumn<QStringList>("sourceNames");
+    QTest::addColumn<QStringList>("existingNames");
+    QTest::addColumn<QString>("text");
+
+    QTest::newRow("first-copy-and-counts")
+        << QStringList{"a_001.pdf", "b_002.pdf", "clip.mp4", "paris_004.pdf", "rome_005.pdf"}
+        << QStringList{"paris_p001.PDF"}
+        << QString("Exemple : b_002.pdf → PARIS_P002.pdf\n3 fichiers à copier, 2 ignorés");
+    QTest::newRow("singular")
+        << QStringList{"clip.mp4", "paris_004.pdf"} << QStringList{}
+        << QString("Exemple : paris_004.pdf → PARIS_P004.pdf\n1 fichier à copier, 1 ignoré");
+    QTest::newRow("hide-zero-skipped")
+        << QStringList{"paris_004.pdf"} << QStringList{}
+        << QString("Exemple : paris_004.pdf → PARIS_P004.pdf\n1 fichier à copier");
+    QTest::newRow("all-skipped")
+        << QStringList{"clip.mp4", "paris_004.pdf"} << QStringList{"paris_p004.pdf"}
+        << QString("Aucun fichier à copier, 2 ignorés");
+    QTest::newRow("empty-directory")
+        << QStringList{} << QStringList{} << QString("Aucun fichier à copier");
+    QTest::newRow("literal-name-on-one-line")
+        << QStringList{"<b>paris\n_004.pdf"} << QStringList{}
+        << QString("Exemple : <b>paris\\n_004.pdf → PARIS_P004.pdf\n1 fichier à copier");
+}
+
+void FileRenamerTests::previewText()
+{
+    QFETCH(QStringList, sourceNames);
+    QFETCH(QStringList, existingNames);
+    QFETCH(QString, text);
+    const auto plan = RenameCore::plan(sourceNames, existingNames, "PARIS_P{n}");
+    QCOMPARE(RenameCore::previewText(plan), text);
 }
 
 void FileRenamerTests::invalidNomenclature_data()

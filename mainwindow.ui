@@ -7,142 +7,108 @@
     <x>0</x>
     <y>0</y>
     <width>640</width>
-    <height>270</height>
+    <height>255</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size><width>520</width><height>220</height></size>
   </property>
   <property name="windowTitle">
    <string notr="true">FileRenamer</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="windowLayout">
+    <property name="spacing"><number>16</number></property>
+    <property name="leftMargin"><number>20</number></property>
+    <property name="topMargin"><number>20</number></property>
+    <property name="rightMargin"><number>20</number></property>
+    <property name="bottomMargin"><number>20</number></property>
     <item>
-     <widget class="QTabWidget" name="tabWidget">
-      <widget class="QWidget" name="tabRename">
-       <attribute name="title">
-        <string>Renommer</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="renameLayout">
-        <property name="spacing"><number>12</number></property>
-        <property name="leftMargin"><number>16</number></property>
-        <property name="topMargin"><number>16</number></property>
-        <property name="rightMargin"><number>16</number></property>
-        <property name="bottomMargin"><number>16</number></property>
-        <item>
-         <layout class="QGridLayout" name="renameForm">
-          <property name="horizontalSpacing"><number>8</number></property>
-          <property name="verticalSpacing"><number>8</number></property>
-          <item row="0" column="0">
-           <widget class="QLabel" name="sourceLabel">
-            <property name="text"><string>Dossier source</string></property>
-            <property name="buddy"><cstring>sourceDirLineEdit</cstring></property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="FolderDropLineEdit" name="sourceDirLineEdit"/>
-          </item>
-          <item row="0" column="2" colspan="2">
-           <widget class="QPushButton" name="browseSourceButton">
-            <property name="accessibleName"><string>Parcourir le dossier source</string></property>
-            <property name="text"><string>Parcourir</string></property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="destLabel">
-            <property name="text"><string>Dossier d'arrivée</string></property>
-            <property name="buddy"><cstring>destDirLineEdit</cstring></property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="FolderDropLineEdit" name="destDirLineEdit"/>
-          </item>
-          <item row="1" column="2" colspan="2">
-           <widget class="QPushButton" name="browseDestButton">
-            <property name="accessibleName"><string>Parcourir le dossier d'arrivée</string></property>
-            <property name="text"><string>Parcourir</string></property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="nomenclatureLabel">
-            <property name="text"><string>Nomenclature</string></property>
-            <property name="buddy"><cstring>nomenclatureComboBox</cstring></property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="nomenclatureComboBox">
-            <property name="editable"><bool>true</bool></property>
-            <property name="insertPolicy"><enum>QComboBox::NoInsert</enum></property>
-            <property name="sizeAdjustPolicy"><enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum></property>
-            <property name="minimumContentsLength"><number>14</number></property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QPushButton" name="saveNomenclatureButton">
-            <property name="text"><string>Enregistrer</string></property>
-            <property name="accessibleName"><string>Enregistrer la nomenclature</string></property>
-           </widget>
-          </item>
-          <item row="2" column="3">
-           <widget class="QPushButton" name="removeNomenclatureButton">
-            <property name="text"><string>Supprimer</string></property>
-            <property name="accessibleName"><string>Supprimer la nomenclature</string></property>
-           </widget>
-          </item>
-          <item row="3" column="1" colspan="3">
-           <widget class="QLabel" name="nomenclatureHint">
-            <property name="text"><string>{n} marque l'emplacement du numéro.</string></property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <spacer name="renameSpacer">
-          <property name="orientation"><enum>Qt::Vertical</enum></property>
-         </spacer>
-        </item>
-        <item alignment="Qt::AlignRight">
-         <widget class="QPushButton" name="renameButton">
-          <property name="minimumSize">
-           <size><width>110</width><height>0</height></size>
-          </property>
-          <property name="text"><string>Renommer</string></property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tabSettings">
-       <attribute name="title">
-        <string>Paramètres</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="settingsLayout">
-        <property name="leftMargin"><number>16</number></property>
-        <property name="topMargin"><number>16</number></property>
-        <property name="rightMargin"><number>16</number></property>
-        <property name="bottomMargin"><number>16</number></property>
-        <item>
-         <widget class="QGroupBox" name="themeGroupBox">
-          <property name="title"><string>Thème</string></property>
-          <layout class="QVBoxLayout" name="themeLayout">
-           <item>
-            <widget class="QRadioButton" name="darkThemeRadioButton">
-             <property name="text"><string>Sombre</string></property>
-             <property name="checked"><bool>true</bool></property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QRadioButton" name="lightThemeRadioButton">
-             <property name="text"><string>Clair</string></property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <spacer name="settingsSpacer">
-          <property name="orientation"><enum>Qt::Vertical</enum></property>
-         </spacer>
-        </item>
-       </layout>
-      </widget>
+     <layout class="QGridLayout" name="renameForm">
+      <property name="horizontalSpacing"><number>8</number></property>
+      <property name="verticalSpacing"><number>8</number></property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="sourceLabel">
+        <property name="text"><string>Dossier source</string></property>
+        <property name="buddy"><cstring>sourceDirLineEdit</cstring></property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="FolderDropLineEdit" name="sourceDirLineEdit"/>
+      </item>
+      <item row="0" column="2" colspan="2">
+       <widget class="QPushButton" name="browseSourceButton">
+        <property name="accessibleName"><string>Parcourir le dossier source</string></property>
+        <property name="text"><string>Parcourir</string></property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="destLabel">
+        <property name="text"><string>Dossier d'arrivée</string></property>
+        <property name="buddy"><cstring>destDirLineEdit</cstring></property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="FolderDropLineEdit" name="destDirLineEdit"/>
+      </item>
+      <item row="1" column="2" colspan="2">
+       <widget class="QPushButton" name="browseDestButton">
+        <property name="accessibleName"><string>Parcourir le dossier d'arrivée</string></property>
+        <property name="text"><string>Parcourir</string></property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="nomenclatureLabel">
+        <property name="text"><string>Nomenclature</string></property>
+        <property name="buddy"><cstring>nomenclatureComboBox</cstring></property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="nomenclatureComboBox">
+        <property name="editable"><bool>true</bool></property>
+        <property name="insertPolicy"><enum>QComboBox::NoInsert</enum></property>
+        <property name="sizeAdjustPolicy"><enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum></property>
+        <property name="minimumContentsLength"><number>14</number></property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QPushButton" name="saveNomenclatureButton">
+        <property name="text"><string>Enregistrer</string></property>
+        <property name="accessibleName"><string>Enregistrer la nomenclature</string></property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QPushButton" name="removeNomenclatureButton">
+        <property name="text"><string>Supprimer</string></property>
+        <property name="accessibleName"><string>Supprimer la nomenclature</string></property>
+       </widget>
+      </item>
+      <item row="3" column="1" colspan="3">
+       <widget class="QLabel" name="renamePreview">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="textFormat"><enum>Qt::PlainText</enum></property>
+        <property name="alignment"><set>Qt::AlignLeft|Qt::AlignTop</set></property>
+        <property name="wordWrap"><bool>true</bool></property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <spacer name="renameSpacer">
+      <property name="orientation"><enum>Qt::Vertical</enum></property>
+     </spacer>
+    </item>
+    <item alignment="Qt::AlignRight">
+     <widget class="QPushButton" name="renameButton">
+      <property name="minimumSize">
+       <size><width>110</width><height>0</height></size>
+      </property>
+      <property name="text"><string>Renommer</string></property>
      </widget>
     </item>
    </layout>
@@ -156,7 +122,6 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>tabWidget</tabstop>
   <tabstop>sourceDirLineEdit</tabstop>
   <tabstop>browseSourceButton</tabstop>
   <tabstop>destDirLineEdit</tabstop>
@@ -165,8 +130,6 @@
   <tabstop>saveNomenclatureButton</tabstop>
   <tabstop>removeNomenclatureButton</tabstop>
   <tabstop>renameButton</tabstop>
-  <tabstop>darkThemeRadioButton</tabstop>
-  <tabstop>lightThemeRadioButton</tabstop>
  </tabstops>
  <resources/>
  <connections/>
