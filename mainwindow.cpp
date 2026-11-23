@@ -59,6 +59,10 @@ QString skipReasonText(RenameCore::SkipReason reason)
         return MainWindow::tr("Une entrée du même nom existe déjà dans le dossier d'arrivée.");
     case RenameCore::SkipReason::DuplicateOutput:
         return MainWindow::tr("Un fichier source précédent produit le même nom de copie.");
+    case RenameCore::SkipReason::OutsideSeries:
+        return MainWindow::tr("Le fichier ne fait pas partie de la série retenue.");
+    case RenameCore::SkipReason::PrefixMismatch:
+        return MainWindow::tr("Le nom du fichier ne commence pas par le début de nom imposé.");
     }
     Q_UNREACHABLE();
 }

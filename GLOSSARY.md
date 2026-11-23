@@ -20,6 +20,14 @@ _À éviter_ : nom de base, nouveau nom, motif
 Le dernier nombre présent dans le nom d'un fichier source, toujours écrit sur au moins trois chiffres dans la copie renommée (1 devient 001).
 _À éviter_ : index, compteur
 
+**Série** :
+Les fichiers du dossier source dont le nom, numéro retiré, est identique sans tenir compte des majuscules ni de l'extension (`paris_004.pdf` et `PARIS_005.jpg`) ; seule la série la plus nombreuse est copiée.
+_À éviter_ : famille, groupe, lot
+
+**Début de nom imposé** :
+Texte saisi par l'utilisatrice qui remplace la détection de la série : seuls les fichiers dont le nom commence par ce texte sont copiés.
+_À éviter_ : filtre, préfixe, motif
+
 **Copie renommée** :
 Le fichier produit dans le dossier d'arrivée ; l'original n'est jamais modifié ni déplacé.
 _À éviter_ : fichier renommé

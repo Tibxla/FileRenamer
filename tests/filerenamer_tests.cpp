@@ -28,6 +28,17 @@ private slots:
     void planSkipsSourceWithoutNumber();
     void planSkipsExistingNameRegardlessOfCase();
     void planKeepsFirstSourceRegardlessOfExtensionCase();
+    void planSelectsDominantSeries();
+    void planGroupsCaseAndExtensionVariants();
+    void planDistinguishesTextAfterNumber();
+    void planReportsTiedSeriesInOrder();
+    void planReportsNoNumberedFile();
+    void planUsesImposedPrefix_data();
+    void planUsesImposedPrefix();
+    void planUsesImposedPrefixVerbatim();
+    void planTreatsBlankImposedPrefixAsAutomatic();
+    void planKeepsFirstSourceCaseInPattern();
+    void planSortsOtherSeriesAndKeepsSkippedOrder();
     void previewText_data();
     void previewText();
     void invalidNomenclature_data();
@@ -105,7 +116,7 @@ void FileRenamerTests::normalizeNomenclature()
 
 void FileRenamerTests::planMultiplePlaceholdersAndExtensions()
 {
-    const auto plan = RenameCore::plan({"paris_004P", "rapport.v2_006.PDF"}, {}, "P{n}-{n}");
+    const auto plan = RenameCore::plan({"paris_004P", "paris_006P.PDF"}, {}, "P{n}-{n}");
     QCOMPARE(plan.skipped.size(), 0);
     QCOMPARE(plan.copies.size(), 2);
     QCOMPARE(plan.copies.at(0).outputName, QString("P004-004"));
@@ -136,13 +147,184 @@ void FileRenamerTests::planSkipsExistingNameRegardlessOfCase()
 
 void FileRenamerTests::planKeepsFirstSourceRegardlessOfExtensionCase()
 {
-    const auto plan = RenameCore::plan({"a_1.PDF", "B_1.pdf"}, {}, "PARIS_P{n}");
+    const auto plan = RenameCore::plan({"a_1.PDF", "A_1.pdf"}, {}, "PARIS_P{n}");
     QCOMPARE(plan.copies.size(), 1);
     QCOMPARE(plan.copies.constFirst().sourceName, QString("a_1.PDF"));
     QCOMPARE(plan.copies.constFirst().outputName, QString("PARIS_P001.PDF"));
     QCOMPARE(plan.skipped.size(), 1);
-    QCOMPARE(plan.skipped.constFirst().sourceName, QString("B_1.pdf"));
+    QCOMPARE(plan.skipped.constFirst().sourceName, QString("A_1.pdf"));
     QCOMPARE(plan.skipped.constFirst().reason, RenameCore::SkipReason::DuplicateOutput);
+}
+
+static QStringList parisSourceNames()
+{
+    QStringList names;
+    for (int number = 1; number <= 148; ++number) {
+        names.append(QStringLiteral("paris_%1.pdf").arg(number, 3, 10, QLatin1Char('0')));
+    }
+    names.append({"IMG_4521.jpg", "couverture.pdf"});
+    return names;
+}
+
+void FileRenamerTests::planSelectsDominantSeries()
+{
+    const auto plan = RenameCore::plan(parisSourceNames(), {}, "PARIS_P{n}");
+    QCOMPARE(plan.seriesStatus, RenameCore::SeriesStatus::Dominant);
+    QCOMPARE(plan.series.pattern, QString("paris_…"));
+    QCOMPARE(plan.series.size, 148);
+    QCOMPARE(plan.copies.size(), 148);
+    QCOMPARE(plan.skipped.size(), 2);
+    QCOMPARE(plan.skipped.at(0).sourceName, QString("IMG_4521.jpg"));
+    QCOMPARE(plan.skipped.at(0).reason, RenameCore::SkipReason::OutsideSeries);
+    QCOMPARE(plan.skipped.at(1).sourceName, QString("couverture.pdf"));
+    QCOMPARE(plan.skipped.at(1).reason, RenameCore::SkipReason::NoNumber);
+    QCOMPARE(plan.otherSeries.size(), 1);
+    QCOMPARE(plan.otherSeries.constFirst().pattern, QString("IMG_…"));
+    QCOMPARE(plan.otherSeries.constFirst().size, 1);
+}
+
+void FileRenamerTests::planGroupsCaseAndExtensionVariants()
+{
+    const auto plan = RenameCore::plan({"paris_004.pdf", "PARIS_005.jpg"}, {}, "PARIS_P{n}");
+    QCOMPARE(plan.seriesStatus, RenameCore::SeriesStatus::Single);
+    QCOMPARE(plan.series.pattern, QString("paris_…"));
+    QCOMPARE(plan.series.size, 2);
+    QVERIFY(plan.otherSeries.isEmpty());
+    QVERIFY(plan.skipped.isEmpty());
+    QCOMPARE(plan.copies.size(), 2);
+}
+
+void FileRenamerTests::planDistinguishesTextAfterNumber()
+{
+    const auto plan = RenameCore::plan({"paris_004.pdf", "paris_005P.pdf", "paris_006P.pdf"}, {}, "PARIS_P{n}");
+    QCOMPARE(plan.seriesStatus, RenameCore::SeriesStatus::Dominant);
+    QCOMPARE(plan.series.pattern, QString("paris_…P"));
+    QCOMPARE(plan.series.size, 2);
+    QCOMPARE(plan.copies.size(), 2);
+    QCOMPARE(plan.skipped.size(), 1);
+    QCOMPARE(plan.skipped.constFirst().sourceName, QString("paris_004.pdf"));
+    QCOMPARE(plan.skipped.constFirst().reason, RenameCore::SkipReason::OutsideSeries);
+}
+
+void FileRenamerTests::planReportsTiedSeriesInOrder()
+{
+    const QStringList names{"paris_004.pdf", "Scan 23-11.pdf", "lyon_001.pdf", "paris_005.pdf", "lyon_002.pdf"};
+    const auto plan = RenameCore::plan(names, {}, "PARIS_P{n}");
+    QCOMPARE(plan.seriesStatus, RenameCore::SeriesStatus::Tie);
+    QVERIFY(plan.series.pattern.isEmpty());
+    QCOMPARE(plan.series.size, 0);
+    QVERIFY(plan.copies.isEmpty());
+    QCOMPARE(plan.otherSeries.size(), 2);
+    QCOMPARE(plan.otherSeries.at(0).pattern, QString("lyon_…"));
+    QCOMPARE(plan.otherSeries.at(0).size, 2);
+    QCOMPARE(plan.otherSeries.at(1).pattern, QString("paris_…"));
+    QCOMPARE(plan.otherSeries.at(1).size, 2);
+    QCOMPARE(plan.skipped.size(), names.size());
+    for (qsizetype i = 0; i < names.size(); ++i) {
+        QCOMPARE(plan.skipped.at(i).sourceName, names.at(i));
+        QCOMPARE(plan.skipped.at(i).reason, RenameCore::SkipReason::OutsideSeries);
+    }
+}
+
+void FileRenamerTests::planReportsNoNumberedFile()
+{
+    const auto plan = RenameCore::plan({"clip.mp4", "couverture.pdf"}, {}, "PARIS_P{n}");
+    QCOMPARE(plan.seriesStatus, RenameCore::SeriesStatus::NoNumberedFile);
+    QVERIFY(plan.series.pattern.isEmpty());
+    QCOMPARE(plan.series.size, 0);
+    QVERIFY(plan.otherSeries.isEmpty());
+    QVERIFY(plan.copies.isEmpty());
+    QCOMPARE(plan.skipped.size(), 2);
+    QCOMPARE(plan.skipped.at(0).reason, RenameCore::SkipReason::NoNumber);
+    QCOMPARE(plan.skipped.at(1).reason, RenameCore::SkipReason::NoNumber);
+}
+
+void FileRenamerTests::planUsesImposedPrefix_data()
+{
+    QTest::addColumn<QString>("prefix");
+    QTest::newRow("same-case") << QString("IMG");
+    QTest::newRow("different-case") << QString("img");
+}
+
+void FileRenamerTests::planUsesImposedPrefix()
+{
+    QFETCH(QString, prefix);
+    const QStringList names = parisSourceNames();
+    const auto plan = RenameCore::plan(names, {}, "PARIS_P{n}", prefix);
+    QCOMPARE(plan.seriesStatus, RenameCore::SeriesStatus::PrefixImposed);
+    QVERIFY(plan.series.pattern.isEmpty());
+    QCOMPARE(plan.series.size, 0);
+    QVERIFY(plan.otherSeries.isEmpty());
+    QCOMPARE(plan.copies.size(), 1);
+    QCOMPARE(plan.copies.constFirst().sourceName, QString("IMG_4521.jpg"));
+    QCOMPARE(plan.copies.constFirst().outputName, QString("PARIS_P4521.jpg"));
+    QCOMPARE(plan.skipped.size(), 149);
+    for (qsizetype i = 0; i < 148; ++i) {
+        QCOMPARE(plan.skipped.at(i).sourceName, names.at(i));
+        QCOMPARE(plan.skipped.at(i).reason, RenameCore::SkipReason::PrefixMismatch);
+    }
+    QCOMPARE(plan.skipped.constLast().sourceName, QString("couverture.pdf"));
+    QCOMPARE(plan.skipped.constLast().reason, RenameCore::SkipReason::PrefixMismatch);
+}
+
+void FileRenamerTests::planUsesImposedPrefixVerbatim()
+{
+    const auto plan = RenameCore::plan({"IMG_4521.jpg", " IMG_4521.jpg", " IMG_4521.pdf"}, {},
+                                       "PARIS_P{n}", " IMG_4521.j");
+    QCOMPARE(plan.seriesStatus, RenameCore::SeriesStatus::PrefixImposed);
+    QCOMPARE(plan.copies.size(), 1);
+    QCOMPARE(plan.copies.constFirst().sourceName, QString(" IMG_4521.jpg"));
+    QCOMPARE(plan.skipped.size(), 2);
+    QCOMPARE(plan.skipped.at(0).reason, RenameCore::SkipReason::PrefixMismatch);
+    QCOMPARE(plan.skipped.at(1).reason, RenameCore::SkipReason::PrefixMismatch);
+
+    const auto noNumber = RenameCore::plan({"IMG_couverture.jpg"}, {}, "PARIS_P{n}", "IMG_");
+    QVERIFY(noNumber.copies.isEmpty());
+    QCOMPARE(noNumber.skipped.size(), 1);
+    QCOMPARE(noNumber.skipped.constFirst().reason, RenameCore::SkipReason::NoNumber);
+}
+
+void FileRenamerTests::planTreatsBlankImposedPrefixAsAutomatic()
+{
+    const auto plan = RenameCore::plan(parisSourceNames(), {}, "PARIS_P{n}", "   ");
+    QCOMPARE(plan.seriesStatus, RenameCore::SeriesStatus::Dominant);
+    QCOMPARE(plan.series.pattern, QString("paris_…"));
+    QCOMPARE(plan.copies.size(), 148);
+}
+
+void FileRenamerTests::planKeepsFirstSourceCaseInPattern()
+{
+    const auto plan = RenameCore::plan({"sCaN 23-12.PDF", "SCAN 23-11.jpg"}, {}, "SCAN_{n}");
+    QCOMPARE(plan.seriesStatus, RenameCore::SeriesStatus::Single);
+    QCOMPARE(plan.series.pattern, QString("sCaN 23-…"));
+    QCOMPARE(plan.series.size, 2);
+}
+
+void FileRenamerTests::planSortsOtherSeriesAndKeepsSkippedOrder()
+{
+    using RenameCore::SkipReason;
+    const QStringList names{"z_1.pdf", "a_1.pdf", "clip.mp4", "paris_001.pdf", "paris_1.PDF",
+                            "scan_9.pdf", "paris_002.pdf", "a_2.pdf", "z_2.pdf"};
+    const auto plan = RenameCore::plan(names, {"paris_p002.pdf"}, "PARIS_P{n}");
+    QCOMPARE(plan.seriesStatus, RenameCore::SeriesStatus::Dominant);
+    QCOMPARE(plan.series.size, 3);
+    QCOMPARE(plan.otherSeries.size(), 3);
+    QCOMPARE(plan.otherSeries.at(0).pattern, QString("a_…"));
+    QCOMPARE(plan.otherSeries.at(1).pattern, QString("z_…"));
+    QCOMPARE(plan.otherSeries.at(2).pattern, QString("scan_…"));
+    QCOMPARE(plan.copies.size(), 1);
+    QCOMPARE(plan.copies.constFirst().sourceName, QString("paris_001.pdf"));
+
+    const QList<SkipReason> reasons{SkipReason::OutsideSeries, SkipReason::OutsideSeries, SkipReason::NoNumber,
+                                    SkipReason::DuplicateOutput, SkipReason::OutsideSeries, SkipReason::AlreadyExists,
+                                    SkipReason::OutsideSeries, SkipReason::OutsideSeries};
+    QStringList skippedNames = names;
+    skippedNames.removeAt(3);
+    QCOMPARE(plan.skipped.size(), reasons.size());
+    for (qsizetype i = 0; i < reasons.size(); ++i) {
+        QCOMPARE(plan.skipped.at(i).sourceName, skippedNames.at(i));
+        QCOMPARE(plan.skipped.at(i).reason, reasons.at(i));
+    }
 }
 
 void FileRenamerTests::previewText_data()
@@ -152,9 +334,9 @@ void FileRenamerTests::previewText_data()
     QTest::addColumn<QString>("text");
 
     QTest::newRow("first-copy-and-counts")
-        << QStringList{"a_001.pdf", "b_002.pdf", "clip.mp4", "paris_004.pdf", "rome_005.pdf"}
+        << QStringList{"a_001.pdf", "a_002.pdf", "clip.mp4", "a_004.pdf", "a_005.pdf"}
         << QStringList{"paris_p001.PDF"}
-        << QString("Exemple : b_002.pdf → PARIS_P002.pdf\n3 fichiers à copier, 2 ignorés");
+        << QString("Exemple : a_002.pdf → PARIS_P002.pdf\n3 fichiers à copier, 2 ignorés");
     QTest::newRow("singular")
         << QStringList{"clip.mp4", "paris_004.pdf"} << QStringList{}
         << QString("Exemple : paris_004.pdf → PARIS_P004.pdf\n1 fichier à copier, 1 ignoré");

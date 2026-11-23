@@ -3,20 +3,73 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
+#include <QHash>
+#include <QPair>
 #include <QRegularExpression>
 #include <QSet>
 
+#include <algorithm>
+
 namespace RenameCore {
+namespace {
+
+QRegularExpressionMatch lastNumberMatch(const QString &baseName)
+{
+    static const QRegularExpression digits(QStringLiteral("[0-9]+"));
+    auto matches = digits.globalMatch(baseName);
+    QRegularExpressionMatch number;
+    while (matches.hasNext()) {
+        number = matches.next();
+    }
+    return number;
+}
+
+struct SourceNumber {
+    QString digits;
+    qsizetype seriesIndex = -1;
+};
+
+qsizetype selectSeries(const QList<Series> &series, Plan &result)
+{
+    if (series.isEmpty()) {
+        return -1;
+    }
+
+    const auto largest = std::max_element(series.cbegin(), series.cend(),
+                                          [](const Series &left, const Series &right) {
+        return left.size < right.size;
+    });
+    const qsizetype largestSize = largest->size;
+    const bool tied = std::count_if(series.cbegin(), series.cend(), [largestSize](const Series &entry) {
+        return entry.size == largestSize;
+    }) > 1;
+
+    qsizetype selected = -1;
+    if (tied) {
+        result.seriesStatus = SeriesStatus::Tie;
+    } else {
+        selected = largest - series.cbegin();
+        result.seriesStatus = series.size() == 1 ? SeriesStatus::Single : SeriesStatus::Dominant;
+        result.series = *largest;
+    }
+
+    for (qsizetype i = 0; i < series.size(); ++i) {
+        const Series &entry = series.at(i);
+        if (i != selected && (!tied || entry.size == largestSize)) {
+            result.otherSeries.append(entry);
+        }
+    }
+    std::sort(result.otherSeries.begin(), result.otherSeries.end(), [](const Series &left, const Series &right) {
+        return left.size == right.size ? left.pattern < right.pattern : left.size > right.size;
+    });
+    return selected;
+}
+
+}
 
 QString extractNumber(const QString &fileName)
 {
-    static const QRegularExpression digits(QStringLiteral("[0-9]+"));
-    auto matches = digits.globalMatch(QFileInfo(fileName).completeBaseName());
-    QString number;
-    while (matches.hasNext()) {
-        number = matches.next().captured();
-    }
-    return number;
+    return lastNumberMatch(QFileInfo(fileName).completeBaseName()).captured();
 }
 
 QString formatNumber(const QString &digits)
@@ -62,9 +115,41 @@ QString normalizeNomenclature(const QString &nomenclature)
 }
 
 Plan plan(const QStringList &sourceNames, const QStringList &existingNames,
-          const QString &nomenclature)
+          const QString &nomenclature, const QString &imposedPrefix)
 {
     Plan result;
+    const bool prefixImposed = !imposedPrefix.trimmed().isEmpty();
+    QList<SourceNumber> sourceNumbers;
+    qsizetype selectedSeries = -1;
+    if (prefixImposed) {
+        result.seriesStatus = SeriesStatus::PrefixImposed;
+    } else {
+        QList<Series> series;
+        QHash<QPair<QString, QString>, qsizetype> seriesIndexes;
+        sourceNumbers.reserve(sourceNames.size());
+        for (const QString &sourceName : sourceNames) {
+            const QString baseName = QFileInfo(sourceName).completeBaseName();
+            const auto match = lastNumberMatch(baseName);
+            if (!match.hasMatch()) {
+                sourceNumbers.append(SourceNumber{});
+                continue;
+            }
+
+            const QString before = baseName.left(match.capturedStart());
+            const QString after = baseName.mid(match.capturedEnd());
+            const auto key = qMakePair(before.toCaseFolded(), after.toCaseFolded());
+            qsizetype index = seriesIndexes.value(key, -1);
+            if (index == -1) {
+                index = series.size();
+                seriesIndexes.insert(key, index);
+                series.append({before + QStringLiteral("…") + after, 0});
+            }
+            ++series[index].size;
+            sourceNumbers.append({match.captured(), index});
+        }
+        selectedSeries = selectSeries(series, result);
+    }
+
     const QString nameTemplate = normalizeNomenclature(nomenclature);
     QSet<QString> existing;
     for (const QString &name : existingNames) {
@@ -72,10 +157,20 @@ Plan plan(const QStringList &sourceNames, const QStringList &existingNames,
     }
 
     QSet<QString> planned;
-    for (const QString &sourceName : sourceNames) {
-        const QString number = extractNumber(sourceName);
+    for (qsizetype i = 0; i < sourceNames.size(); ++i) {
+        const QString &sourceName = sourceNames.at(i);
+        if (prefixImposed && !sourceName.startsWith(imposedPrefix, Qt::CaseInsensitive)) {
+            result.skipped.append({sourceName, SkipReason::PrefixMismatch});
+            continue;
+        }
+
+        const QString number = prefixImposed ? extractNumber(sourceName) : sourceNumbers.at(i).digits;
         if (number.isEmpty()) {
             result.skipped.append({sourceName, SkipReason::NoNumber});
+            continue;
+        }
+        if (!prefixImposed && sourceNumbers.at(i).seriesIndex != selectedSeries) {
+            result.skipped.append({sourceName, SkipReason::OutsideSeries});
             continue;
         }
 
