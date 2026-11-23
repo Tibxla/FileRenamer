@@ -1,121 +1,31 @@
 # FileRenamer
 
-## Description
+FileRenamer creates renamed copies of numbered files in a destination folder. Your originals stay in the source folder, and existing files in the destination folder are never overwritten.
 
-**FileRenamer** is a desktop application developed in C++ with the Qt framework, designed to simplify bulk file renaming and creation of PDF files with custom names. It offers an intuitive user interface and customization options such as theme selection (light or dark) and numbering pattern configuration. A fun virus simulation feature (can be disabled) is also included for demonstrations.
+## Download for Windows
 
-## Features
+Download `FileRenamer-windows.zip` from [GitHub Releases](https://github.com/Tibxla/FileRenamer/releases). Extract the archive and run `FileRenamer.exe` from the extracted folder.
 
-- **File Renaming**:
-  - Selection of a source folder and a destination folder.
-  - Definition of a base name for renamed files.
-  - Customization of numbering patterns (number of digits, adding letters before or after, custom regex).
-- **PDF File Creation**:
-  - Generation of empty PDF files with a base name and sequential numbering.
-  - Choice of destination folder and number of files (from 1 to 10,000).
-- **Customizable Settings**:
-  - Theme selection (light or dark).
-  - Configuration of the number of digits for numbering.
-  - Pattern options for renaming (with or without letters, custom regex).
-- **Virus Simulation (optional)**:
-  - After 5 minutes, multiple pop-ups open simulating a virus alert (can be disabled in settings).
-- Modern interface with a splash screen at startup.
+## Rename files
 
-## Executable Version
+1. Choose the source and destination folders with **Parcourir**, or drag a folder onto either field. Dropping a file fills the field with its parent folder. You can also type the paths. FileRenamer creates the destination folder if needed.
+2. Enter a naming template in **Nomenclature**. Use `{n}` wherever the number should appear. For example, `PARIS_P{n}` turns `paris_004.pdf` into `PARIS_P004.pdf`. A template without `{n}`, such as `paris`, is treated as `paris_{n}`.
+3. Click **Renommer**. The progress dialog lets you cancel between copies. The result dialog lists the reason for each skipped file.
 
-- The project includes a compiled and executable version in the `bin` folder. You can download this folder to use the application without having to compile it yourself.
-- On Windows, run `FileRenamer.exe` to start the application.
-- Make sure all dependencies (Qt DLLs, etc.) are present in the `bin` folder for the application to work correctly.
+FileRenamer uses the last group of digits before the final extension and preserves leading zeroes. For example, `rapport.v2_004.pdf` yields `004`, and `clip.mp4` is skipped because its name before the extension has no number. Copies keep the source file's final extension, if any. The app processes visible files directly inside the source folder in case-insensitive name order.
 
-## Installation
+Use **Enregistrer** to save a template to the list and **Supprimer** to remove it. The app restores the last template used for a batch. The **Paramètres** tab lets you choose between light and dark themes.
 
-### Prerequisites
+## Build and test
 
-Before starting, make sure you have installed:
-- **CMake** (version 3.16 or higher) to generate the project.
-- **Qt** (version 5 or 6) with the **Widgets** component.
-- A compatible C++ compiler (for example, MSVC on Windows, GCC on Linux/macOS).
-- A development environment (optional, such as Qt Creator or Visual Studio).
+Install CMake 3.16 or later, Ninja, a C++17 compiler, and Qt 6 with the Widgets and Test modules. Run these commands from the repository root.
 
-### Installation Steps
+```sh
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
 
-#### Download and Preparation
+If CMake cannot find Qt, pass `-DCMAKE_PREFIX_PATH=/path/to/your/Qt/kit` when configuring. CTest sets `QT_QPA_PLATFORM=offscreen` for the test executable.
 
-1. Download the project ZIP from the GitHub repository and extract it to a folder (for example, `FileRenamer-master`).
-2. Rename the folder to `FileRenamer` to simplify paths (optional).
-
-#### Configuration and Compilation
-
-1. Open a terminal in the `FileRenamer` folder.
-2. Create a build folder:
-   ```
-   mkdir build
-   cd build
-   ```
-3. Configure the project with CMake (adjust the Qt path according to your installation):
-   ```
-   cmake .. -DCMAKE_PREFIX_PATH="path/to/Qt/5.x.x/compiler/lib/cmake"
-   ```
-   Example on Windows with Qt 5.15.2 and MSVC:
-   ```
-   cmake .. -DCMAKE_PREFIX_PATH="C:/Qt/5.15.2/msvc2019_64/lib/cmake"
-   ```
-4. Compile the project:
-   ```
-   cmake --build . --config Release
-   ```
-5. The executable `FileRenamer` (or `FileRenamer.exe` on Windows) will be generated in `build/Release`.
-
-#### Launching the Application
-
-1. Navigate to the `build/Release` folder.
-2. Launch the application:
-   - On Windows: double-click on `FileRenamer.exe`.
-   - On Linux/macOS: run `./FileRenamer` in the terminal.
-3. A splash screen will display for 1.3 seconds, followed by the main window.
-
-**Note:** Recompile the project if you modify the code or resources (for example, `resources.qrc`).
-
-## Usage
-
-1. **Rename Files**:
-   - Click "Browse" to select the source folder and destination folder.
-   - Enter a base name for the files.
-   - Click "Rename" to start the process.
-2. **Create PDF Files**:
-   - Enter a base name for the PDF files.
-   - Select the destination folder.
-   - Specify the number of files to create (1 to 10,000).
-   - Click "Create PDF Files".
-3. **Settings**:
-   - Adjust the number of digits for numbering.
-   - Choose a renaming pattern (letters before/after, custom regex).
-   - Select a theme (light or dark).
-   - Enable/disable the virus simulation (enabled by default).
-
-## Project Structure
-
-The project is organized as follows:
-- **`resources.qrc`**: Contains resources such as:
-  - `icon.png`: Application icon.
-  - `style.qss`: Style for the dark theme.
-  - `light.qss`: Style for the light theme.
-  - `animation.gif`: Animation (not currently used).
-- **`mainwindow.ui`**: Interface designed with Qt Designer (tabs "Rename", "Create PDF", "Settings").
-- **`CMakeLists.txt`**: CMake script for configuration and compilation.
-- **`app.rc`**: Windows resources for the icon (Windows only).
-- **`mainwindow.h` and `mainwindow.cpp`**: Main logic (events, settings, virus simulation).
-- **`main.cpp`**: Entry point, initializes the application and splash screen.
-- **`splashwidget.h` and `splashwidget.cpp`**: Splash screen management.
-
-## Troubleshooting Common Issues
-
-- **CMake Error During Compilation**:
-  - Check the Qt path in `CMAKE_PREFIX_PATH`.
-  - Make sure the **Widgets** component is installed.
-- **The Application Doesn't Start or Themes Don't Apply**:
-  - Verify that `style.qss` and `light.qss` are included in `resources.qrc`.
-- **The Virus Simulation Doesn't Work**:
-  - Confirm that the option is enabled in "Settings" and wait 5 minutes.
-- **The "Browse" Buttons Don't Respond**:
-  - Check the slot connections in `mainwindow.cpp`.
+Launch `build/FileRenamer` on Linux, `build/FileRenamer.exe` on Windows, or `build/FileRenamer.app` on macOS.
