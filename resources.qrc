@@ -4,6 +4,6 @@
         <file>icon.png</file>
         <file>style.qss</file>
         <file>light.qss</file>
-        <file>animation.gif</file>
+        <file>dropdown-arrow.xpm</file>
     </qresource>
 </RCC>

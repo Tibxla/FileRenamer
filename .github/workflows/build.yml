@@ -1,0 +1,75 @@
+name: Build and test
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  QT_QPA_PLATFORM: offscreen
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Qt and Ninja
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qt6-base-dev ninja-build
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          arch: win64_msvc2022_64
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+      - name: Package Windows application
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path build/deploy
+          Copy-Item build/FileRenamer.exe build/deploy/
+          windeployqt --release build/deploy/FileRenamer.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Compress-Archive -Path build/deploy/* -DestinationPath FileRenamer-windows.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FileRenamer-windows
+          path: FileRenamer-windows.zip
+          if-no-files-found: error
+
+  release:
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+    needs: [linux, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: FileRenamer-windows
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: FileRenamer-windows.zip
+          fail_on_unmatched_files: true
