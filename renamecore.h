@@ -33,6 +33,8 @@ struct DirectoryPaths {
 };
 
 QString extractNumber(const QString &fileName);
+// Writes a numéro on at least three digits: "1" -> "001", "0001" -> "001", "1234" stays.
+QString formatNumber(const QString &digits);
 QString validateNomenclature(const QString &nomenclature);
 QString normalizeNomenclature(const QString &nomenclature);
 

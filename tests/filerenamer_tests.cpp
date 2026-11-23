@@ -20,6 +20,9 @@ class FileRenamerTests : public QObject
 private slots:
     void extractNumber_data();
     void extractNumber();
+    void formatNumber_data();
+    void formatNumber();
+    void planPadsNumbersToThreeDigits();
     void normalizeNomenclature();
     void planMultiplePlaceholdersAndExtensions();
     void planSkipsSourceWithoutNumber();
@@ -59,6 +62,40 @@ void FileRenamerTests::extractNumber()
     QCOMPARE(RenameCore::extractNumber(name), number);
 }
 
+void FileRenamerTests::formatNumber_data()
+{
+    QTest::addColumn<QString>("digits");
+    QTest::addColumn<QString>("formatted");
+    QTest::newRow("one-digit") << QString("1") << QString("001");
+    QTest::newRow("two-digits") << QString("12") << QString("012");
+    QTest::newRow("three-digits") << QString("004") << QString("004");
+    QTest::newRow("extra-zeroes") << QString("0001") << QString("001");
+    QTest::newRow("zero") << QString("0") << QString("000");
+    QTest::newRow("many-zeroes") << QString("00000") << QString("000");
+    QTest::newRow("four-digits") << QString("1234") << QString("1234");
+    QTest::newRow("long-number") << QString("123456789012345678901234567890")
+                                 << QString("123456789012345678901234567890");
+}
+
+void FileRenamerTests::formatNumber()
+{
+    QFETCH(QString, digits);
+    QFETCH(QString, formatted);
+    QCOMPARE(RenameCore::formatNumber(digits), formatted);
+}
+
+void FileRenamerTests::planPadsNumbersToThreeDigits()
+{
+    const auto plan = RenameCore::plan({"paris_1.pdf", "paris_01.pdf", "paris_1234.pdf"}, {},
+                                       "PARIS_P{n}");
+    QCOMPARE(plan.copies.size(), 2);
+    QCOMPARE(plan.copies.at(0).outputName, QString("PARIS_P001.pdf"));
+    QCOMPARE(plan.copies.at(1).outputName, QString("PARIS_P1234.pdf"));
+    QCOMPARE(plan.skipped.size(), 1);
+    QCOMPARE(plan.skipped.at(0).sourceName, QString("paris_01.pdf"));
+    QCOMPARE(plan.skipped.at(0).reason, RenameCore::SkipReason::DuplicateOutput);
+}
+
 void FileRenamerTests::normalizeNomenclature()
 {
     QCOMPARE(RenameCore::normalizeNomenclature("paris"), QString("paris_{n}"));
@@ -90,7 +127,7 @@ void FileRenamerTests::planSkipsSourceWithoutNumber()
 
 void FileRenamerTests::planSkipsExistingNameRegardlessOfCase()
 {
-    const auto plan = RenameCore::plan({"x_1.PDF"}, {"paris_p1.pdf"}, "PARIS_P{n}");
+    const auto plan = RenameCore::plan({"x_1.PDF"}, {"paris_p001.pdf"}, "PARIS_P{n}");
     QVERIFY(plan.copies.isEmpty());
     QCOMPARE(plan.skipped.size(), 1);
     QCOMPARE(plan.skipped.constFirst().sourceName, QString("x_1.PDF"));
@@ -102,7 +139,7 @@ void FileRenamerTests::planKeepsFirstSourceRegardlessOfExtensionCase()
     const auto plan = RenameCore::plan({"a_1.PDF", "B_1.pdf"}, {}, "PARIS_P{n}");
     QCOMPARE(plan.copies.size(), 1);
     QCOMPARE(plan.copies.constFirst().sourceName, QString("a_1.PDF"));
-    QCOMPARE(plan.copies.constFirst().outputName, QString("PARIS_P1.PDF"));
+    QCOMPARE(plan.copies.constFirst().outputName, QString("PARIS_P001.PDF"));
     QCOMPARE(plan.skipped.size(), 1);
     QCOMPARE(plan.skipped.constFirst().sourceName, QString("B_1.pdf"));
     QCOMPARE(plan.skipped.constFirst().reason, RenameCore::SkipReason::DuplicateOutput);

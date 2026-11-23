@@ -17,7 +17,7 @@ Modèle de nom de sortie enregistré par l'utilisateur, où `{n}` marque l'empla
 _À éviter_ : nom de base, nouveau nom, motif
 
 **Numéro** :
-Le dernier nombre présent dans le nom d'un fichier source, repris tel qu'il est écrit, zéros de tête compris.
+Le dernier nombre présent dans le nom d'un fichier source, toujours écrit sur au moins trois chiffres dans la copie renommée (1 devient 001).
 _À éviter_ : index, compteur
 
 **Copie renommée** :

@@ -19,6 +19,16 @@ QString extractNumber(const QString &fileName)
     return number;
 }
 
+QString formatNumber(const QString &digits)
+{
+    qsizetype firstSignificant = 0;
+    while (firstSignificant < digits.size() - 1 && digits.at(firstSignificant) == QLatin1Char('0')) {
+        ++firstSignificant;
+    }
+    const QString significant = digits.mid(firstSignificant);
+    return significant.rightJustified(3, QLatin1Char('0'));
+}
+
 QString validateNomenclature(const QString &nomenclature)
 {
     if (nomenclature.isEmpty()) {
@@ -70,7 +80,7 @@ Plan plan(const QStringList &sourceNames, const QStringList &existingNames,
         }
 
         QString outputName = nameTemplate;
-        outputName.replace(QStringLiteral("{n}"), number);
+        outputName.replace(QStringLiteral("{n}"), formatNumber(number));
         const QString extension = QFileInfo(sourceName).suffix();
         if (!extension.isEmpty()) {
             outputName += QLatin1Char('.') + extension;
