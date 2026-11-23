@@ -1,14 +1,18 @@
-QMainWindow, QProgressDialog, QMessageBox {
+QMainWindow, QProgressDialog, QMessageBox, QFileDialog {
     background-color: #f0f0f0;
     color: #161616;
 }
 
-QLabel, QRadioButton {
+QLabel {
     color: #161616;
 }
 
-QLabel#nomenclatureHint {
+QLabel#renamePreview {
     color: #575757;
+}
+
+QLabel#renamePreview[previewError="true"] {
+    color: #a32323;
 }
 
 QPushButton, QLineEdit, QComboBox {
@@ -91,7 +95,7 @@ QComboBox::down-arrow {
     height: 5px;
 }
 
-QComboBox QAbstractItemView {
+QComboBox QAbstractItemView, QFileDialog QAbstractItemView {
     background-color: #ffffff;
     color: #161616;
     border: 1px solid #999999;
@@ -102,51 +106,6 @@ QComboBox QAbstractItemView {
 
 QComboBox QAbstractItemView::item {
     min-height: 22px;
-}
-
-QGroupBox {
-    color: #161616;
-    border: 1px solid #999999;
-    margin-top: 1em;
-    padding: 8px;
-}
-
-QGroupBox::title {
-    subcontrol-origin: margin;
-    subcontrol-position: top left;
-    padding: 0 4px;
-}
-
-QRadioButton::indicator {
-    border: 1px solid #575757;
-    background-color: #ffffff;
-    width: 14px;
-    height: 14px;
-    border-radius: 8px;
-}
-
-QRadioButton::indicator:checked {
-    background-color: #245b91;
-    border: 3px solid #ffffff;
-    width: 10px;
-    height: 10px;
-}
-
-QTabWidget::pane {
-    border: 1px solid #999999;
-    background: #f0f0f0;
-}
-
-QTabBar::tab {
-    background: #dcdcdc;
-    color: #161616;
-    padding: 6px 12px;
-}
-
-QTabBar::tab:selected {
-    background: #f0f0f0;
-    border-bottom: 2px solid #245b91;
-    padding-bottom: 4px;
 }
 
 QProgressBar {
