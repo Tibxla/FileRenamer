@@ -16,7 +16,7 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
-class QLineEdit;
+class FolderDropZone;
 
 class MainWindow : public QMainWindow
 {
@@ -27,18 +27,30 @@ public:
     ~MainWindow() override;
 
 protected:
-    bool eventFilter(QObject *watched, QEvent *event) override;
+    void closeEvent(QCloseEvent *event) override;
 
 private:
-    void browseDirectory(QLineEdit *field, const QString &title);
+    // Ce qu'affiche le bas de la carte : l'aperçu, la copie en cours ou son résultat.
+    enum class Panel {
+        Preview,
+        Progress,
+        Result
+    };
+
+    void browseDirectory(FolderDropZone *zone, const QString &title);
+    void inputsChanged();
     void renameFiles();
     void saveNomenclature();
     void removeNomenclature();
     void updateNomenclatureButtons();
     void refreshPreviewDirectories();
     void updatePreview();
-    void setPreview(const QString &text, bool error = false);
-    void fitPreview();
+    void showMessage(const QString &text, bool error);
+    void showPanel(Panel panel);
+    void setBusy(bool busy);
+    void showResult(qsizetype copied, const QStringList &ignored, bool cancelled);
+    void setIgnoredExpanded(bool expanded);
+    void updateStretch();
 
     std::unique_ptr<Ui::MainWindow> ui;
     QSettings settings;
@@ -48,7 +60,10 @@ private:
     bool previewSameDirectory = false;
     QStringList previewSourceNames;
     QStringList previewExistingNames;
-    QString previewText;
+    Panel panel = Panel::Preview;
+    bool copying = false;
+    bool cancelRequested = false;
+    QString resultFolder;
 };
 
 #endif

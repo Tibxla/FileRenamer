@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(FileRenamer VERSION 1.1.0 LANGUAGES CXX)
+project(FileRenamer VERSION 1.2.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -8,7 +8,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets Test)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Svg Test)
 
 if(MSVC)
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/utf-8>)
@@ -17,8 +17,13 @@ endif()
 add_library(filerenamer_core STATIC
     renamecore.h
     renamecore.cpp
-    folderdroplineedit.h
-    folderdroplineedit.cpp
+    displaytext.h
+    elidedlabel.h
+    elidedlabel.cpp
+    folderdropzone.h
+    folderdropzone.cpp
+    iconview.h
+    iconview.cpp
     nomenclaturestore.h
     nomenclaturestore.cpp
 )
@@ -30,9 +35,11 @@ qt_add_executable(FileRenamer WIN32 MACOSX_BUNDLE
     mainwindow.h
     mainwindow.cpp
     mainwindow.ui
+    theme.h
+    theme.cpp
     resources.qrc
 )
-target_link_libraries(FileRenamer PRIVATE filerenamer_core)
+target_link_libraries(FileRenamer PRIVATE filerenamer_core Qt6::Svg)
 
 if(WIN32)
     enable_language(RC)

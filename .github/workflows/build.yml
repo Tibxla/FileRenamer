@@ -20,7 +20,7 @@ jobs:
       - name: Install Qt and Ninja
         run: |
           sudo apt-get update
-          sudo apt-get install -y qt6-base-dev ninja-build
+          sudo apt-get install -y qt6-base-dev qt6-svg-dev ninja-build
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
       - name: Build
@@ -54,6 +54,9 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           if (!(Test-Path -LiteralPath build/deploy/translations/qt_fr.qm -PathType Leaf)) {
             throw "Missing French Qt translation in the deployment directory."
+          }
+          if (!(Test-Path -LiteralPath build/deploy/imageformats/qsvg.dll -PathType Leaf)) {
+            throw "Missing Qt SVG image format plugin in the deployment directory."
           }
           Compress-Archive -Path build/deploy/* -DestinationPath FileRenamer-windows.zip
       - uses: actions/upload-artifact@v4
