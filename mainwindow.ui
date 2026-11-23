@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>720</width>
-    <height>550</height>
+    <height>610</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -186,7 +186,10 @@
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="messageLabel">
+               <layout class="QVBoxLayout" name="messageTextLayout">
+                <property name="spacing"><number>4</number></property>
+                <item>
+                 <widget class="QLabel" name="messageLabel">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
                   <horstretch>1</horstretch>
@@ -196,6 +199,15 @@
                 <property name="textFormat"><enum>Qt::PlainText</enum></property>
                 <property name="wordWrap"><bool>true</bool></property>
                </widget>
+                </item>
+                <item alignment="Qt::AlignLeft">
+                 <widget class="QToolButton" name="tieButton">
+                  <property name="focusPolicy"><enum>Qt::TabFocus</enum></property>
+                  <property name="text"><string>Imposer un début de nom</string></property>
+                  <property name="autoRaise"><bool>true</bool></property>
+                 </widget>
+                </item>
+               </layout>
               </item>
              </layout>
             </widget>
@@ -268,6 +280,124 @@
                 <property name="orientation"><enum>Qt::Horizontal</enum></property>
                 <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
                </spacer>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QWidget" name="seriesBox" native="true">
+             <layout class="QVBoxLayout" name="seriesLayout">
+              <property name="spacing"><number>6</number></property>
+              <property name="leftMargin"><number>0</number></property>
+              <property name="topMargin"><number>2</number></property>
+              <property name="rightMargin"><number>0</number></property>
+              <property name="bottomMargin"><number>0</number></property>
+              <item>
+               <widget class="QWidget" name="seriesRow" native="true">
+                <layout class="QHBoxLayout" name="seriesRowLayout">
+                 <property name="spacing"><number>6</number></property>
+                 <property name="leftMargin"><number>0</number></property>
+                 <property name="topMargin"><number>0</number></property>
+                 <property name="rightMargin"><number>0</number></property>
+                 <property name="bottomMargin"><number>0</number></property>
+                 <item>
+                  <widget class="ElidedLabel" name="seriesLabel"/>
+                 </item>
+                 <item>
+                  <widget class="QToolButton" name="modifyButton">
+                   <property name="focusPolicy"><enum>Qt::TabFocus</enum></property>
+                   <property name="toolTip"><string>Choisir vous-même les fichiers à prendre, d'après le début de leur nom</string></property>
+                   <property name="text"><string>Modifier</string></property>
+                   <property name="autoRaise"><bool>true</bool></property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="seriesRowSpacer">
+                   <property name="orientation"><enum>Qt::Horizontal</enum></property>
+                   <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
+                  </spacer>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QWidget" name="warningRow" native="true">
+                <layout class="QHBoxLayout" name="warningRowLayout">
+                 <property name="spacing"><number>6</number></property>
+                 <property name="leftMargin"><number>0</number></property>
+                 <property name="topMargin"><number>0</number></property>
+                 <property name="rightMargin"><number>0</number></property>
+                 <property name="bottomMargin"><number>0</number></property>
+                 <item>
+                  <widget class="IconView" name="warningIcon">
+                   <property name="minimumSize"><size><width>15</width><height>15</height></size></property>
+                   <property name="maximumSize"><size><width>15</width><height>15</height></size></property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="ElidedLabel" name="warningLabel">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+                     <horstretch>1</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QWidget" name="prefixRow" native="true">
+                <layout class="QVBoxLayout" name="prefixRowLayout">
+                 <property name="spacing"><number>4</number></property>
+                 <property name="leftMargin"><number>0</number></property>
+                 <property name="topMargin"><number>2</number></property>
+                 <property name="rightMargin"><number>0</number></property>
+                 <property name="bottomMargin"><number>0</number></property>
+                 <item>
+                  <widget class="QLabel" name="prefixLabel">
+                   <property name="text"><string>Ne prendre que les fichiers dont le nom commence par</string></property>
+                   <property name="buddy"><cstring>prefixEdit</cstring></property>
+                  </widget>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="prefixFieldLayout">
+                   <property name="spacing"><number>8</number></property>
+                 <item>
+                  <widget class="QLineEdit" name="prefixEdit">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize"><size><width>120</width><height>0</height></size></property>
+                   <property name="maximumSize"><size><width>280</width><height>16777215</height></size></property>
+                   <property name="accessibleName"><string>Début de nom imposé</string></property>
+                   <property name="clearButtonEnabled"><bool>false</bool></property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QToolButton" name="prefixResetButton">
+                   <property name="focusPolicy"><enum>Qt::TabFocus</enum></property>
+                   <property name="toolTip"><string>Revenir à la détection automatique de la série</string></property>
+                   <property name="accessibleName"><string>Revenir à la détection automatique</string></property>
+                   <property name="text"><string>Automatique</string></property>
+                   <property name="toolButtonStyle"><enum>Qt::ToolButtonTextBesideIcon</enum></property>
+                   <property name="autoRaise"><bool>true</bool></property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="prefixFieldSpacer">
+                   <property name="orientation"><enum>Qt::Horizontal</enum></property>
+                   <property name="sizeHint" stdset="0"><size><width>0</width><height>0</height></size></property>
+                  </spacer>
+                 </item>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
               </item>
              </layout>
             </widget>
@@ -461,6 +591,10 @@
   <tabstop>nomenclatureComboBox</tabstop>
   <tabstop>saveNomenclatureButton</tabstop>
   <tabstop>removeNomenclatureButton</tabstop>
+  <tabstop>tieButton</tabstop>
+  <tabstop>modifyButton</tabstop>
+  <tabstop>prefixEdit</tabstop>
+  <tabstop>prefixResetButton</tabstop>
   <tabstop>cancelButton</tabstop>
   <tabstop>ignoredToggle</tabstop>
   <tabstop>openFolderButton</tabstop>

@@ -175,7 +175,7 @@ QLabel#resultLabel {
     font-weight: 600;
 }
 
-QToolButton#ignoredToggle {
+QToolButton#ignoredToggle, QToolButton#modifyButton, QToolButton#tieButton, QToolButton#prefixResetButton {
     background: transparent;
     border: 1px solid transparent;
     border-radius: 4px;
@@ -183,12 +183,71 @@ QToolButton#ignoredToggle {
     padding: 1px 6px 1px 2px;
 }
 
-QToolButton#ignoredToggle:hover {
+QToolButton#ignoredToggle:hover, QToolButton#modifyButton:hover,
+QToolButton#tieButton:hover, QToolButton#prefixResetButton:hover {
     background-color: @subtle;
 }
 
-QToolButton#ignoredToggle:focus {
+QToolButton#ignoredToggle:focus, QToolButton#modifyButton:focus,
+QToolButton#tieButton:focus, QToolButton#prefixResetButton:focus {
     border: 1px solid @focus;
+}
+
+QToolButton#modifyButton, QToolButton#tieButton {
+    padding: 1px 4px;
+    font-weight: 600;
+}
+
+QToolButton#tieButton {
+    margin-left: -4px;
+}
+
+QToolButton#prefixResetButton {
+    color: @secondary;
+    padding: 1px 6px 1px 4px;
+}
+
+QToolButton:disabled {
+    color: @disabledText;
+}
+
+/* Série retenue et début de nom imposé */
+
+QLabel#seriesLabel, QLabel#prefixLabel {
+    color: @secondary;
+}
+
+QLabel#warningLabel {
+    color: @caution;
+    font-size: 9.5pt;
+}
+
+QLineEdit#prefixEdit {
+    background-color: @input;
+    color: @text;
+    border: 1px solid @controlBorder;
+    border-bottom: 1px solid @inputBottom;
+    border-radius: 6px;
+    padding: 0 8px 1px 8px;
+    min-height: 30px;
+    selection-background-color: @accent;
+    selection-color: @onAccent;
+}
+
+QLineEdit#prefixEdit:hover {
+    background-color: @inputHover;
+}
+
+QLineEdit#prefixEdit:focus {
+    background-color: @inputFocus;
+    border-bottom: 2px solid @accent;
+    padding-bottom: 0;
+}
+
+QLineEdit#prefixEdit:disabled {
+    background-color: @controlDisabled;
+    color: @disabledText;
+    border-bottom-color: @controlBorder;
 }
 
 QPlainTextEdit#ignoredList {

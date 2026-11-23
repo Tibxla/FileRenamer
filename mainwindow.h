@@ -18,6 +18,10 @@ QT_END_NAMESPACE
 
 class FolderDropZone;
 
+namespace RenameCore {
+struct Plan;
+}
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -45,7 +49,10 @@ private:
     void updateNomenclatureButtons();
     void refreshPreviewDirectories();
     void updatePreview();
-    void showMessage(const QString &text, bool error);
+    void showMessage(const QString &text, bool error, bool offerPrefix = false);
+    void showSeries(const RenameCore::Plan &plan);
+    void setPrefixOpen(bool open, bool focus = false);
+    QString imposedPrefix() const;
     void showPanel(Panel panel);
     void setBusy(bool busy);
     void showResult(qsizetype copied, const QStringList &ignored, bool cancelled);
@@ -62,6 +69,7 @@ private:
     QStringList previewExistingNames;
     Panel panel = Panel::Preview;
     bool copying = false;
+    bool prefixOpen = false;
     bool cancelRequested = false;
     QString resultFolder;
 };
